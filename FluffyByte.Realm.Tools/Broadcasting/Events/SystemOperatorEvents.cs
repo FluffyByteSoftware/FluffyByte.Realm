@@ -8,7 +8,12 @@
 
 namespace FluffyByte.Realm.Tools.Broadcasting.Events;
 
-public class SystemOperatorEvents
+public class SystemShutdownEvent : EventArgs
+{
+    
+}
+
+public class SystemStartupEvent : EventArgs
 {
     
 }

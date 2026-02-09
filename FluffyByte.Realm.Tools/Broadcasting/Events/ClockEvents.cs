@@ -1,20 +1,26 @@
 /*
- * (SystemStartupEvent.cs)
+ * (ClockEvents.cs)
  *------------------------------------------------------------
- * Created - Sunday, February 8, 2026@4:54:36 PM
+ * Created - Monday, February 9, 2026@11:30:51 AM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
 namespace FluffyByte.Realm.Tools.Broadcasting.Events;
 
-public class SystemStartupEvent : EventArgs
+public class ClockStartedEvent : EventArgs
 {
+    
+}
+
+public class ClockStoppedEvent : EventArgs
+{
+    
 }
 
 /*
  *------------------------------------------------------------
- * (SystemStartupEvent.cs)
+ * (ClockEvents.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

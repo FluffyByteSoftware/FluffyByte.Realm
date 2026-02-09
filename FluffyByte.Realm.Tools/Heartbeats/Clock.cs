@@ -33,6 +33,8 @@ public class Clock : IDisposable
         _tickTimer = new System.Timers.Timer(tickIntervalMs);
         _tickTimer.Elapsed += OnTimerElapsed;
         _tickTimer.AutoReset = true;
+        
+        EventManager.Subscribe<SystemShutdownEvent>(OnSystemShutdown);
     }
 
     public string Name => _name;

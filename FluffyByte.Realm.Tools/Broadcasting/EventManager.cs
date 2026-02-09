@@ -38,7 +38,6 @@ public static class EventManager
             }
 
             handlers.Add(handler);
-            Log.Debug($"Subscribed handler to event type: {eventType.Name}");
         }
     }
 
@@ -56,7 +55,7 @@ public static class EventManager
             if (Subscribers.TryGetValue(eventType, out var handlers))
             {
                 handlers.Remove(handler);
-                Log.Debug($"Unsubscribed handler from event type: {eventType.Name}");
+         
 
                 if (handlers.Count == 0)
                 {
@@ -81,15 +80,12 @@ public static class EventManager
         {
             if (!Subscribers.TryGetValue(eventType, out var handlers) || handlers.Count == 0)
             {
-                Log.Debug($"No subscribers for event type: {eventType.Name}");
                 return;
             }
 
             // Create a copy to avoid modification during iteration
             handlersCopy = new List<Delegate>(handlers);
         }
-
-        Log.Debug($"Publishing event: {eventType.Name} to {handlersCopy.Count} subscriber(s)");
 
         foreach (var handler in handlersCopy)
         {
@@ -99,7 +95,7 @@ public static class EventManager
             }
             catch (Exception ex)
             {
-                Log.Error($"Error invoking handler for event type: {eventType.Name}", ex);
+                Console.WriteLine(ex.Message, ex.StackTrace);
             }
         }
     }
@@ -136,7 +132,7 @@ public static class EventManager
         {
             if (Subscribers.TryRemove(eventType, out _))
             {
-                Log.Debug($"Cleared all subscribers for event type: {eventType.Name}");
+                Console.WriteLine($"Cleared all subscribers for event type: {eventType.Name}");
             }
         }
     }
@@ -150,7 +146,7 @@ public static class EventManager
         {
             var count = Subscribers.Count;
             Subscribers.Clear();
-            Log.Info($"Cleared all event subscriptions. Removed {count} event type(s)");
+            Console.WriteLine($"Cleared all event subscriptions. Removed {count} event type(s)");
         }
     }
 }

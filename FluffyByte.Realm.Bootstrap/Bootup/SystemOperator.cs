@@ -15,16 +15,10 @@ namespace FluffyByte.Realm.Bootstrap.Bootup;
 
 public static class SystemOperator
 {
-    public static CancellationToken ShutdownToken { get; private set; }
-
-    private static CancellationTokenSource? _shutdownSource = null;
     
     public static void InitializeSystem()
     {
         Log.Debug("Initializing system components");
-        
-        _shutdownSource = new CancellationTokenSource();
-        ShutdownToken = _shutdownSource.Token;
         
         DiskManager.Initialize();
 
@@ -33,8 +27,6 @@ public static class SystemOperator
 
     public static void StartSystem()
     {
-        if (_shutdownSource is null || _shutdownSource.IsCancellationRequested)
-            return;
         
         Log.Debug("Starting system components");
         
@@ -43,12 +35,7 @@ public static class SystemOperator
 
     public static void ShutdownSystem()
     {
-        if (_shutdownSource is null)
-            return;
-        
         Log.Debug($"Beginning system shutdown...");
-
-        _shutdownSource.Cancel();
 
         EventManager.Publish(new SystemShutdownEvent());
     }

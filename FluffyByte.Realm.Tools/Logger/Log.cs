@@ -8,6 +8,8 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using FluffyByte.Realm.Tools.Broadcasting;
+using FluffyByte.Realm.Tools.Broadcasting.Events;
 
 namespace FluffyByte.Realm.Tools.Logger;
 
@@ -300,8 +302,9 @@ public static class Log
         }
 
         logBuilder.Append($" - [{location}]");
-
+        
         Console.WriteLine(logBuilder.ToString());
+        EventManager.Publish(new LogEvents(logBuilder.ToString()));
     }
 }
 

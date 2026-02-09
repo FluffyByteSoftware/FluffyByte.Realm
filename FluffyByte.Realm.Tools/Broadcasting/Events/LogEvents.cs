@@ -1,23 +1,21 @@
 /*
- * (ClockStartedEvent.cs)
+ * (LogWriteEvent.cs)
  *------------------------------------------------------------
- * Created - Sunday, February 8, 2026@2:50:11 PM
+ * Created - Sunday, February 8, 2026@12:38:21 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-using FluffyByte.Realm.Tools.Heartbeats;
-
 namespace FluffyByte.Realm.Tools.Broadcasting.Events;
 
-public class ClockStartedEvent : EventArgs
+public class LogEvents(string message) : EventArgs
 {
-    public string ClockName { get; set; } = string.Empty;
+    public string Message { get; set; } = message;
 }
 
 /*
  *------------------------------------------------------------
- * (ClockStartedEvent.cs)
+ * (LogWriteEvent.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

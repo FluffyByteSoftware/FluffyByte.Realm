@@ -1,20 +1,21 @@
 /*
- * (SystemShutdownEvent.cs)
+ * (RealmClient.cs)
  *------------------------------------------------------------
- * Created - Sunday, February 8, 2026@3:10:01 PM
+ * Created - Monday, February 9, 2026@1:24:07 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Tools.Broadcasting.Events;
+namespace FluffyByte.Realm.Networking.Clients;
 
-public class SystemShutdownEvent : EventArgs
+public class RealmClient
 {
+    
 }
 
 /*
  *------------------------------------------------------------
- * (SystemShutdownEvent.cs)
+ * (RealmClient.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

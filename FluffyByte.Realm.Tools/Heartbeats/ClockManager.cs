@@ -35,6 +35,36 @@ public static class ClockManager
             return clock;
         }
     }
+
+    public static void UnregisterClock(string name)
+    {
+        lock (Lock)
+        {
+            Clocks.TryRemove(name, out _);
+        }
+    }
+
+    public static void StartClock(string name)
+    {
+        lock (Lock)
+        {
+            if (Clocks.TryGetValue(name, out var clock))
+            {
+                clock.Start();
+            }
+        }
+    }
+
+    public static void StopClock(string name)
+    {
+        lock (Lock)
+        {
+            if (Clocks.TryGetValue(name, out var clock) && clock.IsRunning)
+            {
+                clock.Stop();
+            }
+        }
+    }
 }
 
 
