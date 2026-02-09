@@ -34,10 +34,10 @@ public class ExceptionLog(Exception ex)
                 sb.AppendLine($"--- Inner Exception (Level: {curDepth}) ---");
             }
 
-            sb.AppendLine($"Exception: {ex.Message}");
+            sb.AppendLine($"Exception: {current.Message}");
     
             if(!string.IsNullOrEmpty(current.StackTrace))
-                sb.AppendLine($"StackTrace: {ex.StackTrace}");
+                sb.AppendLine($"StackTrace: {current.StackTrace}");
 
             current = current.InnerException;
             curDepth++;
@@ -46,10 +46,10 @@ public class ExceptionLog(Exception ex)
         if (current != null && curDepth >= MaxDepth)
         {
             sb.AppendLine();
-            sb.AppendLine($"... (Additional inner exceptions truncated.");
+            sb.AppendLine($"... (Additional inner exceptions truncated)");
         }
 
-        sb.AppendLine($"=== END EXCEPTION DETAILS===");
+        sb.AppendLine($"=== END EXCEPTION DETAILS ===");
 
         return sb.ToString();
     }
