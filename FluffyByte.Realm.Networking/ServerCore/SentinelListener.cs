@@ -7,28 +7,30 @@
  */
 
 using System.Net;
+using FluffyByte.Realm.Networking.ServerCore.Events;
+using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Logger;
 using LiteNetLib;
 
 namespace FluffyByte.Realm.Networking.ServerCore;
 
-public class SentinelListener : INetEventListener
+public class SentinelListener(RealmServer config) : INetEventListener
 {
-    private readonly RealmServer _serverConfig;
+    private readonly RealmServer _serverConfig = config;
     
     public void OnPeerConnected(NetPeer peer)
     {
-        Log.Debug($"Peer connected: {peer.Address}");
+        EventManager.Publish(new PeerConnectedEvent(peer));
     }
 
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
-        Log.Debug($"Peer disconnected: {peer.Address} - Reason: {disconnectInfo.Reason}");
+        EventManager.Publish(new PeerDisconnectedEvent(peer, disconnectInfo));
     }
 
     public void OnNetworkError(IPEndPoint endPoint, System.Net.Sockets.SocketError socketError)
     {
-        Log.Debug($"Network error from {endPoint}: {socketError}");
+        EventManager.Publish(new NetworkErrorEvent(endPoint, socketError));
     }
 
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, 
@@ -36,8 +38,7 @@ public class SentinelListener : INetEventListener
     {
         try
         {
-            Log.Debug($"[Sentinel] Received {reader.AvailableBytes} bytes from {peer.Address}");
-
+            EventManager.Publish(new NetworkReceiveEvent(peer, reader, channelNumber, deliveryMethod));
         }
         catch (Exception ex)
         {
@@ -48,29 +49,57 @@ public class SentinelListener : INetEventListener
     public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, 
         UnconnectedMessageType messageType)
     {
-        Log.Debug($"[Sentinel] Unconnected message from {remoteEndPoint}: Type: {messageType}");
+        EventManager.Publish(new NetworkReceiveUnconnectedEvent(remoteEndPoint, reader, messageType));
     }
 
     public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
     {
-        // Handle latency updates here
-        // TODO
+        EventManager.Publish(new NetworkLatencyUpdateEvent(peer, latency));
     }
 
     public void OnConnectionRequest(ConnectionRequest request)
     {
-        // TODO: Validate connection key
-
-        if (_serverConfig != null && Sentinel.GetConnectedPeerCount() >= _serverConfig.MaxPlayers)
+        try
         {
-            Log.Debug($"[Sentinel] Connection rejected - server full.");
-            request.Reject();
-            return;
-        }
+            if (Sentinel.GetConnectedPeerCount() >= _serverConfig.MaxPlayers)
+            {
+                Log.Debug($"[Sentinel] Connection rejected - server full.");
+                request.Reject();
+                return;
+            }
 
-        Log.Debug($"[Sentinel] Connection accepted - {request.RemoteEndPoint}");
-        request.Accept();
+            if (!string.IsNullOrEmpty(_serverConfig.ConnectionKey))
+            {
+                var requestData = request.Data;
+
+                if (requestData.GetString() != _serverConfig.ConnectionKey)
+                {
+                    Log.Debug($"[Sentinel] Connection rejected - invalid key.");
+                    request.Reject();
+
+                    EventManager.Publish(new ConnectionRequestReceivedEvent(
+                        request.RemoteEndPoint, accepted: false, rejectionReason: "invalid key"));
+
+                    request.Reject();
+                    return;
+                }
+            }
+
+            Log.Debug($"[Sentinel] Connection accepted - {request.RemoteEndPoint}");
+            EventManager.Publish(new ConnectionRequestReceivedEvent(
+                request.RemoteEndPoint,
+                accepted: true,
+                rejectionReason: null));
+
+            request.Accept();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"[Senitnel]: Error handling connection request from {request.RemoteEndPoint}", ex);
+            request.Reject();
+        }
     }
+    
 }
 
 /*

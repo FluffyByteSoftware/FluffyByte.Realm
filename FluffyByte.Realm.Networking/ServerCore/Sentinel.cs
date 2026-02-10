@@ -36,7 +36,7 @@ public static class Sentinel
 
         _serverConfig = serverConfig ?? throw new ArgumentNullException(nameof(serverConfig));
 
-        _listener = new SentinelListener();
+        _listener = new SentinelListener(serverConfig);
         _netManager = new NetManager(_listener)
         {
             AutoRecycle = true,
@@ -85,6 +85,8 @@ public static class Sentinel
         ClockManager.StartClock(NetworkClockName);
 
         _running = true;
+        
+        Log.Info($"[Sentinel]: Server started on port: {_serverConfig.Port}");
     }
 
     private static void Stop()
@@ -122,7 +124,7 @@ public static class Sentinel
     {
         return _netManager.ConnectedPeersCount;
     }
-
+    
     private static void OnNetworkTick(TickEvent e)
     {
         if (e.ClockName != NetworkClockName || !_running)

@@ -29,6 +29,8 @@ public static class DiskManager
     private static long _currentCacheSize;
     private static long _lastFlushTick;
     private static bool _initialized;
+
+    private const string LogDirectory = @$"E:\FluffyByte\Builds\0.0.1\ServerData\Logs\";
     
     public static void Initialize()
     {
@@ -249,15 +251,14 @@ public static class DiskManager
 
             try
             {
-                var logDirectory = @$"E:\Temp\Server\logs";
                 
-                if (!Directory.Exists(logDirectory))
+                if (!Directory.Exists(LogDirectory))
                 {
-                    Directory.CreateDirectory(logDirectory);
+                    Directory.CreateDirectory(LogDirectory);
                 }
 
                 var logFileName = $"realm-{DateTime.Now:yyyy-MM-dd-hh-mm}.log";
-                var logFilePath = Path.Combine(logDirectory, logFileName);
+                var logFilePath = Path.Combine(LogDirectory, logFileName);
 
                 var sb = new StringBuilder();
                 
@@ -266,7 +267,7 @@ public static class DiskManager
                     sb.AppendLine(entry.Message);
                 }
 
-                Console.WriteLine($"SB: {sb.ToString()}");
+                Console.WriteLine($"SB: {sb}");
 
                 File.AppendAllText(logFilePath, sb.ToString());
                 

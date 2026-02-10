@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BaseOutputPath>E:\FluffyByte\Builds\0.0.1\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <!-- Remove BaseIntermediateOutputPath - let it stay in default obj folder -->
+  </PropertyGroup>
+</Project>

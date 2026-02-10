@@ -6,6 +6,8 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Networking.Clients;
+using FluffyByte.Realm.Networking.ServerCore;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Disk;
@@ -21,7 +23,17 @@ public static class SystemOperator
         Log.Debug("Initializing system components");
         
         DiskManager.Initialize();
+        RealmClientManager.Initialize();
+        
+        var realmServer = new RealmServer(
+            "Taerin's Whisper", 
+            "10.0.0.84", 
+            9997, 
+            10, 
+            "Test");
 
+        Sentinel.Initialize(realmServer);
+        
         Log.Debug($"Initialization of system components completed.");
     }
 
@@ -29,6 +41,8 @@ public static class SystemOperator
     {
         
         Log.Debug("Starting system components");
+
+        Sentinel.Start();
         
         Log.Debug($"Finished starting system components.");
     }
