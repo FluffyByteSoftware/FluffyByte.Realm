@@ -342,6 +342,9 @@ public static class DiskManager
             return;
 
         Flush();
+        
+        ClockManager.StopClock("DiskManager");
+        ClockManager.UnregisterClock("DiskManager");
 
         EventManager.Unsubscribe<RequestFileWriteEvent>(OnRequestFileWrite);
         EventManager.Unsubscribe<RequestFileReadEvent>(OnRequestFileRead);
