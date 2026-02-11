@@ -18,6 +18,9 @@ public class RealmClient(NetPeer peer, int clientId)
     public int ClientId { get; private set; } = clientId;
 
     public string? AccountName { get; private set; }
+    
+    public string? PendingAccountName { get; set; } = string.Empty;
+    public byte[]? PendingHashedPassword { get; set; }
 
     public bool IsAuthenticated { get; private set; } = false;
 

@@ -6,6 +6,7 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Networking.Accounts;
 using FluffyByte.Realm.Networking.Clients;
 using FluffyByte.Realm.Networking.ServerCore;
 using FluffyByte.Realm.Tools.Broadcasting;
@@ -33,6 +34,8 @@ public static class SystemOperator
             "Test");
 
         Sentinel.Initialize(realmServer);
+        RealmClientManager.Initialize();
+        AccountManager.Initialize();
         
         Log.Debug($"Initialization of system components completed.");
     }

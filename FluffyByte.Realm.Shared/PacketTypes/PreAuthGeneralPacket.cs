@@ -11,7 +11,13 @@ using LiteNetLib.Utils;
 namespace FluffyByte.Realm.Shared.PacketTypes
 {
     public class PreAuthGeneralPacket : INetSerializable
-    {   public int Header { get; set; }
+    {   
+        /// <summary>
+        /// -1 = Username/Password Rejected
+        /// 0 = Request Username/Password
+        /// 1 = Username/Password Accepted
+        /// </summary>
+        public int Header { get; set; }
         public string Message { get; set; } = string.Empty;
 
         public PreAuthGeneralPacket()

@@ -138,7 +138,9 @@ namespace FluffyByte.Realm.Shared.CryptoTool
         public static byte[] GenerateKey()
         {
             var key = new byte[32]; // 256 bits
+            
             RandomNumberGenerator.Fill(key);
+            
             return key;
         }
 
@@ -148,6 +150,21 @@ namespace FluffyByte.Realm.Shared.CryptoTool
         public static string ByteArrayToHex(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
+        public static bool CompareHashedData(byte[] dataOne, byte[] dataTwo)
+        {
+            if (dataOne.Length != dataTwo.Length)
+                return false;
+
+            var result = 0;
+            
+            for (var i = 0; i < dataOne.Length; i++)
+            {
+                result |= dataOne[i] ^ dataTwo[i];
+            }
+
+            return result == 0;
         }
     }
 }
