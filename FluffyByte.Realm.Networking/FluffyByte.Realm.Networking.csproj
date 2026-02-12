@@ -22,6 +22,10 @@
       <ProjectReference Include="..\FluffyByte.Realm.Shared\FluffyByte.Realm.Shared.csproj" />
       <ProjectReference Include="..\FluffyByte.Realm.Tools\FluffyByte.Realm.Tools.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="LoginServer\Accounts\" />
+    </ItemGroup>
     
     
 </Project>

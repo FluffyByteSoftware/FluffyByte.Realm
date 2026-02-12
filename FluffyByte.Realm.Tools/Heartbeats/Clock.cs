@@ -93,18 +93,10 @@ public class Clock : IDisposable
         };
 
         EventManager.Publish(tickEvent);
-
-        var logsPerMinute = 60000 / _tickIntervalMs;
-        
-        if (_tickCount % logsPerMinute == 0)
-        {
-            Log.Debug($"Clock '{_name}' tick # {_tickCount} - Uptime: {FormatUptime()}");
-        }
     }
 
     private void OnSystemShutdown(SystemShutdownEvent e)
     {
-        Log.Info($"System shutdown detected.  Stopping clock '{_name}'.");
         Stop();
     }
 
@@ -129,8 +121,6 @@ public class Clock : IDisposable
 
         _tickTimer.Dispose();
         EventManager.Unsubscribe<SystemShutdownEvent>(OnSystemShutdown);
-
-        Log.Debug($"Clock '{_name}' disposed.");
     }
 }
 

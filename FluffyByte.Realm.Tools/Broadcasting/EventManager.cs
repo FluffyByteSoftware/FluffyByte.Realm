@@ -7,7 +7,6 @@
  */
 
 using System.Collections.Concurrent;
-using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Tools.Broadcasting;
 
@@ -33,7 +32,7 @@ public static class EventManager
         {
             if (!Subscribers.TryGetValue(eventType, out var handlers))
             {
-                handlers = new List<Delegate>();
+                handlers = [];
                 Subscribers[eventType] = handlers;
             }
 
