@@ -6,6 +6,7 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Networking.LoginServer;
 using FluffyByte.Realm.Networking.ServerCore;
 using FluffyByte.Realm.Networking.ServerCore.Clients;
 using FluffyByte.Realm.Tools.Broadcasting;

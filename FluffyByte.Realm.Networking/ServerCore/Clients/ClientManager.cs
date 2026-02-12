@@ -27,7 +27,7 @@ public static class ClientManager
     /// </summary>
     private static List<RealmClient> Clients { get; set; } = [];
 
-    private static readonly Dictionary<RealmClient, NetPeer> PeerMap = [];
+    private static readonly Dictionary<NetPeer, RealmClient> PeerMap = [];
     
     private static bool _isInitialized;
 
@@ -42,7 +42,7 @@ public static class ClientManager
         if (!Clients.Contains(client))
         {
             Clients.Add(client);
-            PeerMap.Add(client, client.Peer);
+            PeerMap.Add(client.Peer, client);
         }
     }
 
@@ -53,16 +53,12 @@ public static class ClientManager
      
 
         Clients.Remove(client);
-        PeerMap.Remove(client);
+        PeerMap.Remove(client.Peer);
     }
 
     public static RealmClient? GetClientByPeer(NetPeer peer)
     {
-        var client = Clients.FirstOrDefault(c 
-            => PeerMap.TryGetValue(c, out var p) 
-               && Equals(p, peer));
-        
-        return client;
+        return PeerMap.GetValueOrDefault(peer);
     }
     
     /// <summary>

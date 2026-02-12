@@ -12,7 +12,6 @@ namespace FluffyByte.Realm.Shared.PacketTypes
     {
         // Pre-Authentication (before login)
         PreAuthGeneral = 0,
-        
         // Authentication
         LoginRequest = 1,
         LoginResponse = 2,

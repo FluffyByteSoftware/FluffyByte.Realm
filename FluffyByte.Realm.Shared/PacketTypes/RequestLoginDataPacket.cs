@@ -1,26 +1,22 @@
 /*
- * (LoginManager.cs)
+ * (RequestLoginDataPacket.cs)
  *------------------------------------------------------------
- * Created - Wednesday, February 11, 2026@9:57:19 PM
+ * Created - Thursday, February 12, 2026@9:53:20 AM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-using FluffyByte.Realm.Networking.ServerCore.Clients;
-
-namespace FluffyByte.Realm.Networking.LoginServer;
-
-public static class LoginManager
+namespace FluffyByte.Realm.Shared.PacketTypes
 {
-    public static void WelcomeNewClient(RealmClient newClient)
+    public class RequestLoginDataPacket
     {
-        // TODO Authenticate a new Client :)
+        
     }
 }
 
 /*
  *------------------------------------------------------------
- * (LoginManager.cs)
+ * (RequestLoginDataPacket.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

@@ -5,6 +5,8 @@
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
+
+using FluffyByte.Realm.Networking.LoginServer;
 using FluffyByte.Realm.Networking.ServerCore.Clients;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
@@ -127,8 +129,8 @@ public static class RealmManager
         var client = new RealmClient(peer);
 
         ClientManager.AddClient(client);
-        
-        // TODO: Handoff to Login Manager from here
+
+        LoginManager.WelcomeNewClient(client);
     }
 
     /// <summary>
@@ -140,8 +142,13 @@ public static class RealmManager
     private static void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
         Log.Info($"[RealmManager]: Peer Disconnected - {peer.Address}:{peer.Port}");
-        
-        // TODO: Client manager will need to handle any disconnect clean up here
+
+        var client = ClientManager.GetClientByPeer(peer);
+
+        if (client != null)
+        {
+            ClientManager.RemoveClient(client);
+        }
     }
 
     /// <summary>
@@ -164,8 +171,7 @@ public static class RealmManager
             return;
         }
         
-        // TODO: Hand off to PacketManager for routing
-        // PacketManager.Route(peer, reader);
+        PacketManager.Route(client, reader);
         
         reader.Recycle();
     }
@@ -181,7 +187,6 @@ public static class RealmManager
         _netManager = null;
         
         _isInitialized = false;
-        
     }
 }
 

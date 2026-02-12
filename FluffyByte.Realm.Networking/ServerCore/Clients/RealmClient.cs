@@ -20,7 +20,7 @@ public class RealmClient(NetPeer peer)
     private ConcurrentQueue<object> PacketQueue { get; set; }= [];
 
     public string Name { get; private set; } = $"(Client{peer.Id} from {peer.Address})";
-    private ClientAuthenticationState AuthenticationState { get; set; } = ClientAuthenticationState.Fresh;
+    public ClientAuthenticationState AuthenticationState { get; set; } = ClientAuthenticationState.Fresh;
     public string Address => Peer.Address.ToString();
     public int Id => Peer.Id;
 
