@@ -1,24 +1,22 @@
 /*
- * (ClientAuthenticationState.cs)
+ * (AuthenticationServerResponsePacket.cs)
  *------------------------------------------------------------
- * Created - Wednesday, February 11, 2026@8:06:51 PM
+ * Created - Thursday, February 12, 2026@10:28:54 AM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Networking.ServerCore.Clients;
-
-public enum ClientAuthenticationState
+namespace FluffyByte.Realm.Shared.PacketTypes
 {
-    Rejected = -1,
-    Fresh = 0,
-    Authenticated = 1,
-    Pending = 2
+    public class AuthenticationServerResponsePacket
+    {
+        
+    }
 }
 
 /*
  *------------------------------------------------------------
- * (ClientAuthenticationState.cs)
+ * (AuthenticationServerResponsePacket.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

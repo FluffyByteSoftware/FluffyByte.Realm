@@ -11,12 +11,12 @@ using LiteNetLib.Utils;
 
 namespace FluffyByte.Realm.Shared.PacketTypes
 {
-    public class LoginPacket : INetSerializable
+    public class SubmitLoginDataPacket : INetSerializable
     {
         public string Username { get; set; } = string.Empty;
         public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
 
-        public LoginPacket()
+        public SubmitLoginDataPacket()
         {
         }
 

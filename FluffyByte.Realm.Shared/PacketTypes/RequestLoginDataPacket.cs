@@ -6,11 +6,27 @@
  *------------------------------------------------------------
  */
 
+using LiteNetLib.Utils;
+
 namespace FluffyByte.Realm.Shared.PacketTypes
 {
-    public class RequestLoginDataPacket
+    public class RequestLoginDataPacket : INetSerializable
     {
-        
+
+        public RequestLoginDataPacket()
+        {
+            
+        }
+
+        public void Serialize(NetDataWriter writer)
+        {
+            
+        }
+
+        public void Deserialize(NetDataReader reader)
+        {
+            
+        }
     }
 }
 

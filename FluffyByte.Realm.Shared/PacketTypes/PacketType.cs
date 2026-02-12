@@ -11,10 +11,10 @@ namespace FluffyByte.Realm.Shared.PacketTypes
     public enum PacketType : byte
     {
         // Pre-Authentication (before login)
-        PreAuthGeneral = 0,
+        RequestLoginDataPacket = 0,
         // Authentication
-        LoginRequest = 1,
-        LoginResponse = 2,
+        SubmitLoginDataPacket = 1,
+        AuthenticationServerResponsePacket = 2,
         
         // Character Management
         CharacterList = 10,
