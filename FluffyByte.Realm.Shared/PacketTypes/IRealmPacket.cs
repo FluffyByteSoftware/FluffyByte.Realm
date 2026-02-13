@@ -1,21 +1,25 @@
 /*
- * (RealmClient.cs)
+ * (IRealmPacket.cs)
  *------------------------------------------------------------
- * Created - Thursday, February 12, 2026@1:21:12 PM
+ * Created - Thursday, February 12, 2026@1:33:54 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Networking.ServerCore.Clients;
+using System;
+using LiteNetLib.Utils;
 
-public class RealmClient
+namespace FluffyByte.Realm.Shared.PacketTypes
 {
-    
+    public interface IRealmPacket : INetSerializable
+    {
+         DateTime CreatedAt { get; set; }
+    }
 }
 
 /*
  *------------------------------------------------------------
- * (RealmClient.cs)
+ * (IRealmPacket.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

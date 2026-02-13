@@ -11,13 +11,17 @@ using LiteNetLib.Utils;
 
 namespace FluffyByte.Realm.Shared.PacketTypes
 {
-    public class SubmitLoginDataPacket : INetSerializable
+    public class SubmitLoginDataPacket : IRealmPacket
     {
-        public string Username { get; set; } = string.Empty;
-        public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
-
+        public string Username { get; set; }
+        public byte[] PasswordHash { get; set; }
+        public DateTime CreatedAt { get; set; }
+        
         public SubmitLoginDataPacket()
         {
+            CreatedAt = DateTime.UtcNow;
+            Username = string.Empty;
+            PasswordHash = Array.Empty<byte>();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -28,6 +32,7 @@ namespace FluffyByte.Realm.Shared.PacketTypes
 
         public void Deserialize(NetDataReader reader)
         {
+            CreatedAt = new DateTime(reader.GetLong());
             Username = reader.GetString();
             PasswordHash = reader.GetBytesWithLength();
         }
