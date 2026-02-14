@@ -14,7 +14,6 @@ namespace FluffyByte.Realm.Bootstrap.Bootup;
 
 public static class SystemOperator
 {
-    
     public static void InitializeSystem()
     {
         DiskManager.Initialize();

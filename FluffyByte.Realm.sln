@@ -8,8 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluffyByte.Realm.Game", "Fl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluffyByte.Realm.Shared", "FluffyByte.Realm.Shared\FluffyByte.Realm.Shared.csproj", "{813B37DA-9B7E-4699-AA6B-B95AD85ECC4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluffyByte.Realm.UdpNetwork", "FluffyByte.Realm.UdpNetwork\FluffyByte.Realm.UdpNetwork.csproj", "{E7219AFE-029D-43CE-AD7D-1597DBE9381A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +30,5 @@ Global
 		{813B37DA-9B7E-4699-AA6B-B95AD85ECC4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{813B37DA-9B7E-4699-AA6B-B95AD85ECC4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{813B37DA-9B7E-4699-AA6B-B95AD85ECC4F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7219AFE-029D-43CE-AD7D-1597DBE9381A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7219AFE-029D-43CE-AD7D-1597DBE9381A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7219AFE-029D-43CE-AD7D-1597DBE9381A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7219AFE-029D-43CE-AD7D-1597DBE9381A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
