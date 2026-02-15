@@ -1,0 +1,116 @@
+/*
+ * (RealmClient.cs)
+ *------------------------------------------------------------
+ * Created - Friday, February 13, 2026@10:28:31 PM
+ * Created by - Jacob Chacko
+ *------------------------------------------------------------
+ */
+
+using System.Collections.Concurrent;
+using System.Net;
+using FluffyByte.Realm.Shared.PacketTypes;
+using FluffyByte.Realm.Tools.Logger;
+using LiteNetLib;
+using LiteNetLib.Utils;
+
+namespace FluffyByte.Realm.Networking.Clients;
+
+public class RealmClient(NetPeer peer)
+{
+    public NetPeer Peer { get; private set; } = peer;
+    public string Name { get; private set; } = $"Client_{peer.Address}";
+
+    public IPAddress Address => Peer.Address;
+
+    private readonly ConcurrentDictionary<PacketType, ConcurrentQueue<IRealmPacket>> _packetQueues = [];
+
+    public DateTime LoginTime { get; private set; } = DateTime.UtcNow;
+    public DateTime LastResponseTime { get; private set; } = DateTime.UtcNow;
+    public TimeSpan Uptime => DateTime.UtcNow - LoginTime;
+    public TimeSpan IdleTime => DateTime.UtcNow - LastResponseTime;
+
+    private bool _disconnecting;
+    
+    public bool IsConnected
+    {
+        get
+        {
+            if (IdleTime <= TimeSpan.FromMinutes(30)
+                && Peer.ConnectionState == ConnectionState.Connected
+                && !_disconnecting) return true;
+            
+            Disconnect();
+            return false;
+        }
+    }
+
+    public void Enqueue(PacketType type, IRealmPacket packet)
+    {
+        LastResponseTime = DateTime.UtcNow;
+        
+        var queue = _packetQueues.GetOrAdd(type, _ => new ConcurrentQueue<IRealmPacket>());
+        
+        queue.Enqueue(packet);
+    }
+
+    public List<IRealmPacket> DrainQueue(PacketType type)
+    {
+        var drained = new List<IRealmPacket>();
+
+        if (!_packetQueues.TryGetValue(type, out var queue))
+            return drained;
+
+        while (queue.TryDequeue(out var packet))
+        {
+            drained.Add(packet);
+        }
+
+        return drained;
+    }
+
+    public int PendingPacketCount(PacketType type) 
+        => _packetQueues.TryGetValue(type, out var queue) ? queue.Count : 0;
+
+    public int TotalPacketsPending
+    {
+        get
+        {
+            var count = 0;
+            foreach (var queue in _packetQueues.Values)
+                count += queue.Count;
+            
+            return count;
+        }
+    }
+
+    public void SendPacket(PacketType type,
+        IRealmPacket packet, 
+        DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
+    {
+        var writer = new NetDataWriter();
+        writer.Put((byte)type);
+        packet.Serialize(writer);
+        Peer.Send(writer, deliveryMethod);
+    }
+
+    public void Disconnect()
+    {
+        if (_disconnecting)
+            return;
+        
+        _disconnecting = true;
+        
+        Peer.Disconnect();
+
+        _packetQueues.Clear();
+
+        Log.Debug($"[{Name}]: Has been disconnected.");
+    }
+}
+
+/*
+ *------------------------------------------------------------
+ * (RealmClient.cs)
+ * See License.txt for licensing information.
+ *-----------------------------------------------------------
+ */

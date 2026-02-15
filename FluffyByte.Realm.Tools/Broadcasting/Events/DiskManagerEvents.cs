@@ -27,7 +27,7 @@ public class RequestFileWriteEvent : EventArgs
     public string FilePath { get; set; } = string.Empty;
 }
 
-public class LogWriteEevent : EventArgs
+public class LogWriteEvent : EventArgs
 {
     public string Message { get; set; } = string.Empty;
 }
