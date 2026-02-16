@@ -52,14 +52,10 @@ public static class ClientManager
     {
         Clients.Remove(client.Peer.Id);
         
-        
+        if(client.IsConnected)
+            client.Disconnect();
     }
     
-    public static bool ContainsRealmClient(RealmClient client)
-    {
-        return Clients.ContainsKey(client.Peer.Id);
-    }
-
     public static bool ContainsRealmClient(int id)
     {
         return Clients.ContainsKey(id);

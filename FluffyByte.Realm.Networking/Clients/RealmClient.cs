@@ -15,13 +15,14 @@ using LiteNetLib.Utils;
 
 namespace FluffyByte.Realm.Networking.Clients;
 
-public class RealmClient(NetPeer peer)
+public class RealmClient
 {
-    public NetPeer Peer { get; private set; } = peer;
-    public string Name { get; private set; } = $"Client_{peer.Address}";
+    public NetPeer Peer { get; private set; }
+    public string Name { get; private set; }
 
     public IPAddress Address => Peer.Address;
-
+    public byte[]? AuthNonce { get; set; }
+    
     private readonly ConcurrentDictionary<PacketType, ConcurrentQueue<IRealmPacket>> _packetQueues = [];
 
     public DateTime LoginTime { get; private set; } = DateTime.UtcNow;
@@ -30,7 +31,14 @@ public class RealmClient(NetPeer peer)
     public TimeSpan IdleTime => DateTime.UtcNow - LastResponseTime;
 
     private bool _disconnecting;
-    
+
+    public RealmClient(NetPeer peer)
+    {
+        Peer = peer;
+        Name = $"Client_{peer.Id}_{peer.Address}";
+        
+        Log.Info($"[{Name}]: has connected.");
+    }
     public bool IsConnected
     {
         get
@@ -104,7 +112,7 @@ public class RealmClient(NetPeer peer)
 
         _packetQueues.Clear();
 
-        Log.Debug($"[{Name}]: Has been disconnected.");
+        Log.Info($"[{Name}]: Has been disconnected.");
     }
 }
 

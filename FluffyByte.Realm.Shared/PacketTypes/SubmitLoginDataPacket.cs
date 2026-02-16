@@ -14,27 +14,28 @@ namespace FluffyByte.Realm.Shared.PacketTypes
     public class SubmitLoginDataPacket : IRealmPacket
     {
         public string Username { get; set; }
-        public byte[] PasswordHash { get; set; }
+        public byte[] ChallengeResponse { get; set; }
         public DateTime CreatedAt { get; set; }
-        
+
         public SubmitLoginDataPacket()
         {
             CreatedAt = DateTime.UtcNow;
             Username = string.Empty;
-            PasswordHash = Array.Empty<byte>();
+            ChallengeResponse = Array.Empty<byte>();
         }
 
         public void Serialize(NetDataWriter writer)
         {
+            writer.Put(CreatedAt.Ticks);
             writer.Put(Username);
-            writer.PutBytesWithLength(PasswordHash);
+            writer.PutBytesWithLength(ChallengeResponse);
         }
 
         public void Deserialize(NetDataReader reader)
         {
             CreatedAt = new DateTime(reader.GetLong());
             Username = reader.GetString();
-            PasswordHash = reader.GetBytesWithLength();
+            ChallengeResponse = reader.GetBytesWithLength();
         }
     }
 }
