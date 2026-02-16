@@ -13,5 +13,11 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <OutputPath>E:\FluffyByte\Builds\0.0.1\Release</OutputPath>
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\FluffyByte.Realm.Networking\FluffyByte.Realm.Networking.csproj" />
+      <ProjectReference Include="..\FluffyByte.Realm.Shared\FluffyByte.Realm.Shared.csproj" />
+      <ProjectReference Include="..\FluffyByte.Realm.Tools\FluffyByte.Realm.Tools.csproj" />
+    </ItemGroup>
         
 </Project>

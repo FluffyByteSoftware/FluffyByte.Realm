@@ -6,6 +6,7 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Networking.Clients;
 using LiteNetLib;
 
 namespace FluffyByte.Realm.Networking.Events;
@@ -22,6 +23,11 @@ public class OnNetworkReceivedEvent : EventArgs
     public NetPacketReader Reader { get; set; } = null!;
     public byte Channel { get; set; }
     public DeliveryMethod DeliveryMethod { get; set; }
+}
+
+public class OnAuthenticationSuccessEvent : EventArgs
+{
+    public RealmClient Client { get; set; } = null!;
 }
 
 

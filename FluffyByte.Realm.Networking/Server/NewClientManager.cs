@@ -6,23 +6,36 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Networking.Clients;
+using FluffyByte.Realm.Networking.Events;
+using FluffyByte.Realm.Shared.CryptoTool;
 using FluffyByte.Realm.Shared.PacketTypes;
+using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Logger;
+using LiteNetLib;
 
 namespace FluffyByte.Realm.Networking.Server;
 
 public static class NewClientManager
 {
     private const int LoginTimeoutSeconds = 1;
-    
+
     public static void WelcomeNewClient(RealmClient client)
     {
         ClientManager.AddRealmClient(client);
 
-        Log.Debug($"[NewClientManager]: {client.Name} connected. Sending login request.");
-        
-        client.SendPacket(PacketType.RequestLoginDataPacket, new RequestLoginDataPacket());
+        var nonce = CryptoManager.GenerateNonce();
+        client.AuthNonce = nonce;
+
+        Log.Info($"[NewClientManager]: {client.Name} connected. Sending challenge.");
+
+        var requestPacket = new RequestLoginDataPacket()
+        {
+            Nonce = nonce
+        };
+
+        client.SendPacket(PacketType.RequestLoginDataPacket, requestPacket);
 
         _ = WaitForLoginAsync(client);
     }
@@ -41,23 +54,50 @@ public static class NewClientManager
                 HandleLoginSubmission(client, loginPacket);
                 return;
             }
-
+            
             await Task.Delay(100);
         }
 
-        Log.Warn($"[NewClientManager]: {client.Name} failed to respond within time.  Disconnecting.");
-        
+        Log.Warn($"[NewClientManager]: {client.Name} timed out. Disconnecting.");
+        client.AuthNonce = null;
         client.Disconnect();
     }
 
-    private static void HandleLoginSubmission(RealmClient client, SubmitLoginDataPacket loginPacket)
+    private static void HandleLoginSubmission(RealmClient client, SubmitLoginDataPacket packet)
     {
-        Log.Info($"[NewClientManager]: Received login data from {client.Name}");
+        Log.Debug($"[NewClientManager]: Received login from {client.Name} with Username: {packet.Username}");
 
-        var username = loginPacket.Username;
-        var challengeResponse = loginPacket.ChallengeResponse;
+        var account = AccountManager.GetAccountByUsername(packet.Username);
+
+        if (account == null)
+        {
+            Log.Warn($"[NewClientManager]: Account not found for '{packet.Username}'. "+
+                     $"Disconnecting {client.Name}.");
+
+            client.Disconnect();
+            return;
+        }
+
+        var valid = CryptoManager.ValidateChallengeResponse(
+            account.PasswordHash, client.AuthNonce, packet.ChallengeResponse);
+
+        client.AuthNonce = null;
+
+        if (!valid)
+        {
+            Log.Warn($"[NewClientManager]: Authentication failed for '{packet.Username}'. " +
+                     $"Disconnecting {client.Name}.");
+            client.Disconnect();
+            return;
+        }
         
+        Log.Debug($"[NewClientManager]: Authentication successful for '{packet.Username}'.");
         
+        var respond = new AuthenticationServerResponsePacket();
+
+        client.SendPacket(PacketType.AuthenticationServerResponsePacket, respond);
+
+        EventManager.Publish(new OnAuthenticationSuccessEvent() { Client = client });
     }
 }
 

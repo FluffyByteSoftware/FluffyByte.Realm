@@ -8,6 +8,7 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace FluffyByte.Realm.Shared.CryptoTool
 {
@@ -29,124 +30,167 @@ namespace FluffyByte.Realm.Shared.CryptoTool
 
         private const int NonceSize = 12; // 96 bits - standard for AES-GCM
         private const int TagSize = 16; // 128 bits - authentication tag
+        private const int ChallengeNonceSize = 32; // 256 bits for auth challenge none
 
         /// <summary>
-        /// Encrypt data using AES-GCM with the master key.
-        /// Returns: [nonce (12 bytes)][tag (16 bytes)][encrypted data]
+        /// Encrypts a byte array of plaintext data using AES-GCM encryption.
+        /// Generates a unique nonce for each encryption operation, applies encryption,
+        /// and combines the nonce, authentication tag, and ciphertext into a single byte array.
         /// </summary>
-        public static byte[] Encrypt(byte[] plaintext)
+        /// <param name="dataToEncrypt">The plaintext data as a byte array that needs to be encrypted.</param>
+        /// <returns>A byte array containing the nonce, authentication tag, and ciphertext.</returns>
+        /// <exception cref="ArgumentException">Thrown when the provided plaintext data is null or empty.</exception>
+        /// <exception cref="Exception">Thrown when an unexpected error occurs during encryption.</exception>
+        public static byte[] Encrypt(byte[] dataToEncrypt)
         {
-            if (plaintext == null || plaintext.Length == 0)
-                throw new ArgumentException("Plaintext cannot be null or empty", nameof(plaintext));
+            if (dataToEncrypt == null || dataToEncrypt.Length == 0)
+                throw new ArgumentException("Payload cannot be null or empty");
 
             try
             {
                 using var aesGcm = new AesGcm(MasterKey.AsSpan());
 
-                // Generate random nonce (must be unique for each encryption)
+                // Generate the random nonce, which is unique for each encryption.
                 var nonce = new byte[NonceSize];
                 RandomNumberGenerator.Fill(nonce);
 
-                // Allocate space for encrypted data and tag
-                var ciphertext = new byte[plaintext.Length];
+                var ciphertext = new byte[dataToEncrypt.Length];
                 var tag = new byte[TagSize];
 
-                // Encrypt the data
-                aesGcm.Encrypt(nonce.AsSpan(), plaintext.AsSpan(), ciphertext.AsSpan(), tag.AsSpan());
+                aesGcm.Encrypt(nonce.AsSpan(),
+                    dataToEncrypt.AsSpan(),
+                    ciphertext.AsSpan(),
+                    tag.AsSpan());
 
-                // Combine: nonce + tag + ciphertext
                 var result = new byte[NonceSize + TagSize + ciphertext.Length];
                 Buffer.BlockCopy(nonce, 0, result, 0, NonceSize);
                 Buffer.BlockCopy(tag, 0, result, NonceSize, TagSize);
-                Buffer.BlockCopy(ciphertext, 0, result, NonceSize + TagSize, ciphertext.Length);
+                Buffer.BlockCopy(ciphertext, 0, result, NonceSize + TagSize,
+                    ciphertext.Length);
 
                 return result;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CryptoManager] Encryption failed: {ex.Message}");
+                Console.WriteLine($"[CryptoManager]: ERROR ENCOUNTERED IN ENCRYPT:\n{ex.Message}\n{ex.StackTrace}");
                 throw;
             }
         }
 
         /// <summary>
-        /// Decrypt data using AES-GCM with the master key.
-        /// Expects the format: [nonce (12 bytes)][tag (16 bytes)][encrypted data]
+        /// Decrypts a byte array of data that was encrypted using AES-GCM encryption.
+        /// Extracts the nonce, authentication tag, and ciphertext to perform decryption,
+        /// and returns the original plaintext data.
         /// </summary>
+        /// <param name="encryptedData">The encrypted data as a byte array, containing the nonce, authentication tag,
+        /// and ciphertext.</param>
+        /// <returns>A byte array representing the decrypted plaintext data.</returns>
+        /// <exception cref="ArgumentException">Thrown when the provided encrypted data is null, empty, or too short to
+        /// contain valid data.</exception>
+        /// <exception cref="CryptographicException">Thrown when decryption fails, such as when authentication fails or
+        /// the data is corrupted.</exception>
         public static byte[] Decrypt(byte[] encryptedData)
         {
             if (encryptedData == null || encryptedData.Length < NonceSize + TagSize)
-                throw new ArgumentException("Encrypted data is invalid or too short", nameof(encryptedData));
+                throw new ArgumentException("Encrypted data is invalid or too short.", nameof(encryptedData));
 
             try
             {
                 using var aesGcm = new AesGcm(MasterKey.AsSpan());
 
-                // Extract nonce, tag, and ciphertext
+                // Extract nonce
                 var nonce = new byte[NonceSize];
+                // tag it
                 var tag = new byte[TagSize];
+                // and ciphertext
                 var ciphertext = new byte[encryptedData.Length - NonceSize - TagSize];
 
                 Buffer.BlockCopy(encryptedData, 0, nonce, 0, NonceSize);
                 Buffer.BlockCopy(encryptedData, NonceSize, tag, 0, TagSize);
-                Buffer.BlockCopy(encryptedData, NonceSize + TagSize, ciphertext, 0, ciphertext.Length);
+                Buffer.BlockCopy(encryptedData, NonceSize + TagSize, ciphertext, 0,
+                    ciphertext.Length);
 
-                // Decrypt the data
-                var plaintext = new byte[ciphertext.Length];
-                aesGcm.Decrypt(nonce.AsSpan(), ciphertext.AsSpan(), tag.AsSpan(), plaintext.AsSpan());
+                var plainData = new byte[ciphertext.Length];
+                aesGcm.Decrypt(nonce.AsSpan(), ciphertext.AsSpan(), tag.AsSpan(), plainData.AsSpan());
 
-                return plaintext;
-            }
-            catch (CryptographicException ex)
-            {
-                Console.WriteLine(
-                    $"[CryptoManager] Decryption failed - authentication failed or corrupted data: {ex.Message}");
-                throw;
+                return plainData;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CryptoManager] Decryption failed: {ex.Message}");
+                Console.WriteLine($"[CryptoManager]: ERROR ENCOUNTERED IN DECRYPT:\n{ex.Message}\n{ex.StackTrace}");
                 throw;
             }
         }
 
         /// <summary>
-        /// Encrypt a string password and return encrypted bytes.
+        /// Encrypts a plaintext password using AES-GCM encryption and returns the result as a byte array.
+        /// Ensures secure encryption suitable for password storage or transmission.
         /// </summary>
+        /// <param name="password">The plaintext password to be encrypted.</param>
+        /// <returns>A byte array representing the encrypted password.</returns>
+        /// <exception cref="ArgumentException">Thrown when the password is null or empty.</exception>
         public static byte[] EncryptPassword(string password)
         {
             if (string.IsNullOrEmpty(password))
                 throw new ArgumentException("Password cannot be null or empty", nameof(password));
 
-            var passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
+            var passwordBytes = Encoding.UTF8.GetBytes(password);
+
             return Encrypt(passwordBytes);
         }
 
         /// <summary>
-        /// Decrypt encrypted password bytes and return the original string.
+        /// Decrypts an encrypted password and returns the result as a plaintext string.
+        /// Uses AES-GCM decryption to securely restore the original password.
         /// </summary>
+        /// <param name="encryptedPassword">The encrypted password represented as a byte array.</param>
+        /// <returns>The decrypted password as a plaintext string.</returns>
         public static string DecryptPassword(byte[] encryptedPassword)
         {
             var decryptedBytes = Decrypt(encryptedPassword);
-            return System.Text.Encoding.UTF8.GetString(decryptedBytes);
+
+            return Encoding.UTF8.GetString(decryptedBytes);
         }
 
         /// <summary>
-        /// Generate a new random 32-byte AES key.
-        /// Use this to generate a new master key if needed.
+        /// Generates a cryptographically secure random key.
+        /// The generated key is 256 bits in length, suitable for AES encryption or other secure cryptographic
+        /// applications.
         /// </summary>
+        /// <returns>A 32-byte array containing the generated key.</returns>
         public static byte[] GenerateKey()
         {
             var key = new byte[32]; // 256 bits
-            
+
             RandomNumberGenerator.Fill(key);
-            
+
             return key;
         }
 
-        /// <summary>
-        /// Print a byte array as a hex string for debugging/configuration.
-        /// </summary>
+        public static byte[] GenerateNonce()
+        {
+            var nonce = new byte[ChallengeNonceSize];
+            RandomNumberGenerator.Fill(nonce);
+
+            return nonce;
+        }
+
+        public static byte[] ComputeHmac(byte[] key, byte[] data)
+        {
+            using var hmac = new HMACSHA256(key);
+
+            return hmac.ComputeHash(data);
+        }
+
+        public static bool ValidateChallengeResponse(byte[] storedPasswordHash,
+            byte[] nonce,
+            byte[] clientResponse)
+        {
+            var expectedResponse = ComputeHmac(storedPasswordHash, nonce);
+
+            return CompareHashedData(expectedResponse, clientResponse);
+        }
+
         public static string ByteArrayToHex(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", "");
@@ -158,7 +202,7 @@ namespace FluffyByte.Realm.Shared.CryptoTool
                 return false;
 
             var result = 0;
-            
+
             for (var i = 0; i < dataOne.Length; i++)
             {
                 result |= dataOne[i] ^ dataTwo[i];
