@@ -29,9 +29,7 @@ namespace FluffyByte.Realm.Shared.PacketTypes
         ClientRequestZoneLoad = 50,
         UpdateMovementAndRotationClientToServer = 51,
         UpdateMovementAndRotationServerToClient = 52,
-        UpdateJumpVectorServerToClient = 53,
-        UpdateJumpVectorClientToServer = 54,
-        ServerSendZoneToClient = 55,
+        ServerSendZoneToClient = 53,
         
         // Reserved up to 69
         

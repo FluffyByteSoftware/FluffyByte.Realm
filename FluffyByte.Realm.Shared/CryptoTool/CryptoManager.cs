@@ -79,8 +79,8 @@ namespace FluffyByte.Realm.Shared.CryptoTool
 
         /// <summary>
         /// Decrypts a byte array of data that was encrypted using AES-GCM encryption.
-        /// Extracts the nonce, authentication tag, and ciphertext to perform decryption,
-        /// and returns the original plaintext data.
+        /// Extracts the nonce, authentication tag, and ciphertext to decrypt,
+        /// then returns the original plaintext data.
         /// </summary>
         /// <param name="encryptedData">The encrypted data as a byte array, containing the nonce, authentication tag,
         /// and ciphertext.</param>

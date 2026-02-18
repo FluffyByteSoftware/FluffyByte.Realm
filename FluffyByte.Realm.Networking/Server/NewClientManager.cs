@@ -13,7 +13,6 @@ using FluffyByte.Realm.Shared.CryptoTool;
 using FluffyByte.Realm.Shared.PacketTypes;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Logger;
-using LiteNetLib;
 
 namespace FluffyByte.Realm.Networking.Server;
 
@@ -78,22 +77,36 @@ public static class NewClientManager
             return;
         }
 
+        if (client.AuthNonce == null)
+            return;
+        
         var valid = CryptoManager.ValidateChallengeResponse(
             account.PasswordHash, client.AuthNonce, packet.ChallengeResponse);
 
         client.AuthNonce = null;
-
+        
         if (!valid)
         {
             Log.Warn($"[NewClientManager]: Authentication failed for '{packet.Username}'. " +
                      $"Disconnecting {client.Name}.");
+            
+            var failedResponse = new AuthenticationServerResponsePacket()
+            {
+                Success = false
+            };
+
+            client.SendPacket(PacketType.AuthenticationServerResponsePacket, failedResponse);
+            
             client.Disconnect();
             return;
         }
         
         Log.Debug($"[NewClientManager]: Authentication successful for '{packet.Username}'.");
         
-        var respond = new AuthenticationServerResponsePacket();
+        var respond = new AuthenticationServerResponsePacket()
+        {
+            Success = true
+        };
 
         client.SendPacket(PacketType.AuthenticationServerResponsePacket, respond);
 

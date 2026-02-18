@@ -6,9 +6,12 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Networking.Accounting;
+using FluffyByte.Realm.Networking.Server;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Disk;
+using FluffyByte.Realm.Tools.Heartbeats;
 
 namespace FluffyByte.Realm.Bootstrap.Bootup;
 
@@ -17,6 +20,10 @@ public static class SystemOperator
     public static void InitializeSystem()
     {
         DiskManager.Initialize();
+        RealmManager.Initialize();
+        PacketManager.Initialize();
+        AccountManager.Initialize();
+        ClientManager.Initialize();
     }
 
     public static void StartSystem()
@@ -28,8 +35,6 @@ public static class SystemOperator
     {
         EventManager.Publish(new SystemShutdownEvent());
     }
-
-    public static string Version => "0.0.1";
 }
 
 /*

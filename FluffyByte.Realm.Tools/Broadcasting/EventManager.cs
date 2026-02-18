@@ -7,6 +7,7 @@
  */
 
 using System.Collections.Concurrent;
+using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Tools.Broadcasting;
 
@@ -71,6 +72,16 @@ public static class EventManager
     /// <param name="eventArgs">The event data to pass to handlers.</param>
     public static void Publish<TEvent>(TEvent eventArgs) where TEvent : EventArgs
     {
+        lock (Lock)
+        {
+            if (Subscribers.IsEmpty)
+            {
+                Log.Warn(
+                    $"[EventManager]: I was asked to publish event: {eventArgs.GetType().Name} but there are " +
+                    $"no subscribers.");
+                return;
+            }
+        }
         var eventType = typeof(TEvent);
 
         List<Delegate> handlersCopy;

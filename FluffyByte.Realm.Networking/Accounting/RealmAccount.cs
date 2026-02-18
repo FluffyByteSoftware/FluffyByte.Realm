@@ -14,17 +14,19 @@ namespace FluffyByte.Realm.Networking.Accounting;
 
 public class RealmAccount
 {
-    public const int MaxCharacterSlots = 3;
-
+    private const int MaxCharacterSlots = 3;
+    
     public string Username { get; private set; }
     public string FilePath { get; private set; }
     public byte[] PasswordHash { get; private set; }
     public Guid[] Characters { get; private set; }
 
+    private const string AccountsFolder = @"E:\FluffyByte\Builds\0.0.1\ServerData\Accounts";
+    
     public RealmAccount(string username, byte[] passwordHash)
     {
         Username = username;
-        FilePath = Path.Combine("accounts", $"{username}.account");
+        FilePath = Path.Combine(AccountsFolder, $"{username}.account");
         PasswordHash = passwordHash;
         Characters = new Guid[MaxCharacterSlots];
     }
@@ -56,7 +58,7 @@ public class RealmAccount
             FilePath = filePath
         };
         
-        EventManager.Publish<RequestFileReadEvent>(read);
+        EventManager.Publish(read);
         
         var data = read.GetData();
         
@@ -123,20 +125,58 @@ public class RealmAccount
         sb.AppendLine($"#USERNAME={Username}");
         sb.AppendLine($"#HASHPASSWORD={Convert.ToHexString(PasswordHash)}");
 
-        for (var i = 0; i < Characters.Count(); i++)
+        for (var i = 0; i < Characters.Length; i++)
         {
             sb.AppendLine($"#CHARACTER{i + 1}={GuidToString(Characters[i])}");
         }
 
-        var write = new RequestFileWriteEvent()
+        var write = new RequestFileWriteTextEvent()
         {
-            FilePath = Path.Combine("accounts", $"{Username}.account"),
-            Data = Encoding.UTF8.GetBytes(sb.ToString())
+            FilePath = Path.Combine(AccountsFolder, $"{Username}.account"),
+            Text = sb.ToString()
         };
         
-        EventManager.Publish<RequestFileWriteEvent>(write);
+        EventManager.Publish(write);
     }
 
+    public void AddCharacter(Guid characterId)
+    {
+        if (characterId == Guid.Empty)
+            return;
+
+        if (Characters.Contains(characterId))
+            return;
+
+        for (var i = 0; i < Characters.Length; i++)
+        {
+            if (Characters[i] == Guid.Empty)
+            {
+                Characters[i] = characterId;
+                Save();
+                return;
+            }
+        }
+
+        Log.Warn($"[RealmAccount]: Cannot add character {characterId} to {Username}");
+    }
+
+    public void RemoveCharacter(Guid characterId)
+    {
+        if (characterId == Guid.Empty)
+            return;
+
+        for (var i = 0; i < Characters.Length; i++)
+        {
+            if (Characters[i] == characterId)
+            {
+                Characters[i] = Guid.Empty;
+                return;
+            }
+        }
+        
+        Log.Warn($"[RealmAccount]: Cannot remove character {characterId} from {Username}");
+    }
+    
     private static Guid ParseGuid(string value)
     {
         return Guid.TryParse(value, out var guid) ? guid : Guid.Empty;

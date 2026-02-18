@@ -17,7 +17,7 @@ public static class AccountManager
 {
     private static bool _isInitialized;
 
-    private const string AccountsPath = @"accounts/";
+    private const string AccountsPath = @"E:\FluffyByte\Builds\0.0.1\ServerData\Accounts";
     private const string AccountExtension = ".account";
     private const string ClockName = "account-updater";
     
@@ -58,8 +58,7 @@ public static class AccountManager
         _isInitialized = false;
         
         SaveAccounts();
-
-        ClockManager.StopClock(ClockName);
+        
         ClockManager.UnregisterClock(ClockName);
 
         EventManager.Unsubscribe<SystemShutdownEvent>(OnShutdown);
