@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Shared.CryptoTool;
+using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Bootstrap.Bootup;
@@ -11,6 +12,8 @@ public static class Program
     {
         Startup();
 
+        //CreateSeliris();
+        
         Console.ReadLine();
 
         Shutdown();
@@ -34,6 +37,8 @@ public static class Program
         SystemOperator.InitializeSystem();
 
         Task.Delay(100);
+        
+        SystemOperator.StartSystem();
     }
 
     private static void Shutdown()

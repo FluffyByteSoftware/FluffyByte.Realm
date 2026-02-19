@@ -19,7 +19,6 @@ namespace FluffyByte.Realm.Shared.PacketTypes
         public AuthenticationServerResponsePacket()
         {
             CreatedAt = DateTime.UtcNow;
-            Success = false;
         }
 
         public void Serialize(NetDataWriter writer)

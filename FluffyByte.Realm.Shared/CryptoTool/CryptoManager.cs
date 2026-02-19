@@ -48,7 +48,7 @@ namespace FluffyByte.Realm.Shared.CryptoTool
 
             try
             {
-                using var aesGcm = new AesGcm(MasterKey.AsSpan());
+                using var aesGcm = new AesGcm(MasterKey.AsSpan(), TagSize);
 
                 // Generate the random nonce, which is unique for each encryption.
                 var nonce = new byte[NonceSize];
@@ -96,7 +96,7 @@ namespace FluffyByte.Realm.Shared.CryptoTool
 
             try
             {
-                using var aesGcm = new AesGcm(MasterKey.AsSpan());
+                using var aesGcm = new AesGcm(MasterKey.AsSpan(), TagSize);
 
                 // Extract nonce
                 var nonce = new byte[NonceSize];
@@ -134,9 +134,8 @@ namespace FluffyByte.Realm.Shared.CryptoTool
             if (string.IsNullOrEmpty(password))
                 throw new ArgumentException("Password cannot be null or empty", nameof(password));
 
-            var passwordBytes = Encoding.UTF8.GetBytes(password);
-
-            return Encrypt(passwordBytes);
+            using var sha256 = SHA256.Create();
+            return sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
         }
 
         /// <summary>

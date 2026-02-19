@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <OutputPath>E:\FluffyByte\Builds\0.0.1\Debug\</OutputPath>
+      <OutputPath>E:\FluffyByte\Builds\0.0.1\</OutputPath>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <OutputPath>E:\FluffyByte\Builds\0.0.1\Release</OutputPath>
+      <OutputPath>E:\FluffyByte\Builds\0.0.1\</OutputPath>
     </PropertyGroup>
     
 </Project>

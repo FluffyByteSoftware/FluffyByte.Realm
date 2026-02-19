@@ -12,6 +12,7 @@ using FluffyByte.Realm.Networking.Clients;
 using FluffyByte.Realm.Networking.Events;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
+using FluffyByte.Realm.Tools.Heartbeats;
 using FluffyByte.Realm.Tools.Logger;
 using LiteNetLib;
 
@@ -31,17 +32,22 @@ public static class RealmManager
     {
         if (_isInitialized)
             return;
+
+        var addy = IPAddress.Parse("10.0.0.84");
         
         ActiveRealm = new RealmServer("Taerin's Whisper",
-            IPAddress.Parse("10.0.0.84"),
+            addy,
             9997, 10);
 
         EventManager.Subscribe<SystemStartupEvent>(OnStart);
         EventManager.Subscribe<SystemShutdownEvent>(OnShutdown);
+        EventManager.Subscribe<TickEvent>(OnTick);
         
         _isInitialized = true;
         
         Log.Info($"[RealmManager]: Initialized.");
+
+        ClockManager.RegisterClock("NetworkPoller", 15);
     }
     
     private static void OnStart(SystemStartupEvent e)
@@ -58,8 +64,10 @@ public static class RealmManager
         _listener.NetworkReceiveEvent += OnNetworkReceive;
         _listener.NetworkErrorEvent += OnNetworkError;
         
-        _netManager.Start(ActiveRealm.HostAddress, null, ActiveRealm.HostPort);
+        _netManager.Start(ActiveRealm.HostAddress, IPAddress.IPv6Any, ActiveRealm.HostPort);
 
+        ClockManager.StartClock("NetworkPoller");
+        
         Log.Info($"[RealmManager]: Started {ActiveRealm.ServerName} listening on " +
                  $"{ActiveRealm.HostAddress}:{ActiveRealm.HostPort}");
     }
@@ -83,6 +91,11 @@ public static class RealmManager
         
         EventManager.Unsubscribe<SystemStartupEvent>(OnStart);
         EventManager.Unsubscribe<SystemShutdownEvent>(OnShutdown);
+        EventManager.Unsubscribe<TickEvent>(OnTick);
+        
+        _isInitialized = false;
+        
+        Log.Info($"[RealmManager]: Shutdown.");
     }
     #endregion Life Cycle
     
@@ -95,10 +108,13 @@ public static class RealmManager
         if (ClientManager.Clients.Count >= ActiveRealm?.MaxPlayers)
         {
             Log.Debug($"[RealmManager]: Connection Request from {request.RemoteEndPoint} denied. Max Players Reached.");
-            request.Reject();    
+            request.Reject();
+            return;
         }
         
-        request.Accept();
+        Log.Debug($"[RealmManager]: Connection Request from {request.RemoteEndPoint} accepted.");
+        
+        request.AcceptIfKey("FluffyByte");
     }
 
     private static void OnPeerConnected(NetPeer peer)
@@ -138,6 +154,13 @@ public static class RealmManager
     }
     #endregion Listener Events
 
+    private static void OnTick(TickEvent e)
+    {
+        if (e.ClockName != "NetworkPoller" || _netManager == null || !_isInitialized)
+            return;
+
+        _netManager.PollEvents();
+    }
 }
 
 /*

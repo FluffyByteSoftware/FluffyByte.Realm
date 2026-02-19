@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <OutputPath>E:\FluffyByte\Builds\0.0.1\Debug\</OutputPath>
+      <OutputPath>E:\FluffyByte\Builds\0.0.1\</OutputPath>
       <PlatformTarget>x64</PlatformTarget>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <OutputPath>E:\FluffyByte\Builds\0.0.1\Release</OutputPath>
+      <OutputPath>E:\FluffyByte\Builds\0.0.1\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
