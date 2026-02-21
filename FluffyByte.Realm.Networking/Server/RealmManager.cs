@@ -18,16 +18,50 @@ using LiteNetLib;
 
 namespace FluffyByte.Realm.Networking.Server;
 
+/// <summary>
+/// Provides functionality to manage the lifecycle of a RealmServer instance, including initialization
+/// and event subscriptions for system startup and shutdown.
+/// This class acts as the central control point for the Realm server's runtime behavior.
+/// </summary>
+/// <remarks>
+/// The RealmManager is responsible for creating and maintaining the active RealmServer instance,
+/// initializing related services, and handling system lifecycle events.
+/// </remarks>
 public static class RealmManager
 {
+    /// <summary>
+    /// Gets or sets the currently active <see cref="RealmServer"/> instance managed by the <c>RealmManager</c>.
+    /// </summary>
+    /// <remarks>
+    /// This property holds the instance of the <see cref="RealmServer"/> that is currently being managed and operated.
+    /// It can be assigned during the initialization process or manipulated as part of lifecycle management tasks.
+    /// When <c>null</c>, it indicates that no RealmServer is actively managed.
+    /// Changes to this property may directly affect server operations such as event subscriptions or network behavior.
+    /// </remarks>
     public static RealmServer? ActiveRealm { get; set; }
 
+    private const string ClockName = "NetworkPoller";
+    private const int HeartbeatIntervalMs = 10;
+    private static Clock? _clock;
+    
     private static EventBasedNetListener? _listener;
     private static NetManager? _netManager;
     
     private static bool _isInitialized;
     
     #region Life Cycle
+
+    /// <summary>
+    /// Initializes the RealmManager by setting up the primary realm server, subscribing to system events,
+    /// and configuring the internal clock for heartbeat-based logic.
+    /// </summary>
+    /// <remarks>
+    /// This method performs the necessary setup for the RealmManager, including:
+    /// - Creating and assigning an instance of the `RealmServer` to manage the realm.
+    /// - Subscribing to system-level startup and shutdown events.
+    /// - Registering a clock with a heartbeat interval to manage periodic tasks.
+    /// Once initialized, the method ensures that it cannot be re-invoked.
+    /// </remarks>
     public static void Initialize()
     {
         if (_isInitialized)
@@ -41,13 +75,14 @@ public static class RealmManager
 
         EventManager.Subscribe<SystemStartupEvent>(OnStart);
         EventManager.Subscribe<SystemShutdownEvent>(OnShutdown);
-        EventManager.Subscribe<TickEvent>(OnTick);
+        
         
         _isInitialized = true;
         
         Log.Info($"[RealmManager]: Initialized.");
 
-        ClockManager.RegisterClock("NetworkPoller", 15);
+        _clock = ClockManager.RegisterClock(ClockName, HeartbeatIntervalMs);
+        _clock.OnTick += OnTick;
     }
     
     private static void OnStart(SystemStartupEvent e)
@@ -74,7 +109,8 @@ public static class RealmManager
 
     private static void OnShutdown(SystemShutdownEvent e)
     {
-        if (_listener == null || _netManager == null || !_isInitialized) return;
+        if (_listener == null || _netManager == null || !_isInitialized || _clock == null)
+            return;
         
         ActiveRealm = null;
         
@@ -91,7 +127,9 @@ public static class RealmManager
         
         EventManager.Unsubscribe<SystemStartupEvent>(OnStart);
         EventManager.Unsubscribe<SystemShutdownEvent>(OnShutdown);
-        EventManager.Unsubscribe<TickEvent>(OnTick);
+        
+        _clock.OnTick -= OnTick;
+        _clock = null;
         
         _isInitialized = false;
         
@@ -154,11 +192,11 @@ public static class RealmManager
     }
     #endregion Listener Events
 
-    private static void OnTick(TickEvent e)
+    private static void OnTick()
     {
-        if (e.ClockName != "NetworkPoller" || _netManager == null || !_isInitialized)
+        if (_clock == null || !_isInitialized || _netManager == null)
             return;
-
+        
         _netManager.PollEvents();
     }
 }

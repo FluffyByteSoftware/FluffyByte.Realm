@@ -21,6 +21,8 @@ public static class AccountManager
     private const string AccountExtension = ".account";
     private const string ClockName = "account-updater";
     
+    private static Clock? _clock;
+    
     private static readonly List<RealmAccount> Accounts = [];
     private static readonly HashSet<string> KnownFiles = [];
     
@@ -38,11 +40,12 @@ public static class AccountManager
         }
 
         EventManager.Subscribe<SystemShutdownEvent>(OnShutdown);
-        EventManager.Subscribe<TickEvent>(Tick);
         
-        ClockManager.RegisterClock(ClockName, 3000);
-        ClockManager.StartClock(ClockName);
-
+        _clock = ClockManager.RegisterClock(ClockName, 10000);
+        _clock.OnTick += Tick;
+        
+        ClockManager.StartClock(_clock);
+        
         _isInitialized = true;
 
         AccountUpdate();
@@ -52,21 +55,25 @@ public static class AccountManager
 
     private static void OnShutdown(SystemShutdownEvent e)
     {
-        if (!_isInitialized)
+        if (!_isInitialized || _clock == null)
             return;
         
         _isInitialized = false;
         
         SaveAccounts();
+
+        ClockManager.StopClock(_clock);
+        _clock.OnTick -= Tick;
+        _clock = null;
         
         ClockManager.UnregisterClock(ClockName);
 
         EventManager.Unsubscribe<SystemShutdownEvent>(OnShutdown);
     }
 
-    private static void Tick(TickEvent e)
+    private static void Tick()
     {
-        if (e.ClockName != ClockName)
+        if (!_isInitialized || _clock == null)
             return;
         
         AccountUpdate();

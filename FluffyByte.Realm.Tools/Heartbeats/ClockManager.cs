@@ -44,6 +44,14 @@ public static class ClockManager
         }
     }
 
+    public static void StartClock(Clock clock)
+    {
+        lock(Lock)
+        {
+            if (Clocks.TryGetValue(clock.Name, out var registeredClock) && registeredClock == clock)
+                clock.Start();
+        }
+    }
     public static void StartClock(string name)
     {
         lock (Lock)
@@ -60,6 +68,17 @@ public static class ClockManager
         lock (Lock)
         {
             if (Clocks.TryGetValue(name, out var clock) && clock.IsRunning)
+            {
+                clock.Stop();
+            }
+        }
+    }
+    
+    public static void StopClock(Clock clock)
+    {
+        lock (Lock)
+        {
+            if (Clocks.TryGetValue(clock.Name, out var registeredClock) && registeredClock == clock && clock.IsRunning)
             {
                 clock.Stop();
             }

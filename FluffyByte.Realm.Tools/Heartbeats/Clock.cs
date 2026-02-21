@@ -25,6 +25,8 @@ public class Clock : IDisposable
     private bool _disposed;
     private bool _isRunning;
 
+    public event Action? OnTick;
+    
     internal Clock(string name, int tickIntervalMs)
     {
         _name = name;
@@ -84,15 +86,7 @@ public class Clock : IDisposable
     {
         _tickCount++;
 
-        var tickEvent = new TickEvent
-        {
-            ClockName = _name,
-            TickNumber = _tickCount,
-            ElapsedMilliseconds = _stopwatch.ElapsedMilliseconds,
-            DeltaTime = _tickIntervalMs / 1000.0f
-        };
-
-        EventManager.Publish(tickEvent);
+        OnTick?.Invoke();
     }
 
     private void OnSystemShutdown(SystemShutdownEvent e)
@@ -100,7 +94,7 @@ public class Clock : IDisposable
         Stop();
     }
 
-    private string FormatUptime()
+    public string FormatUptime()
     {
         var uptime = DateTime.UtcNow - _startTime;
         
@@ -116,6 +110,8 @@ public class Clock : IDisposable
 
         _disposed = true;
 
+        OnTick = null;
+        
         if(_isRunning)
             Stop();
 

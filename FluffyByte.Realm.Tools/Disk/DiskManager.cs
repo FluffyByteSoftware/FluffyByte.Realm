@@ -23,9 +23,11 @@ public static class DiskManager
     private static readonly Lock LogLock = new Lock();
 
     private const int MaxCacheSizeBytes = 50 * 1024 * 1024; // 50 MB
-    private const int TicksBetweenFlushes = 9000; // 15 minutes at 10 ticks/sec (100 ms tick)
+    private const int TicksBetweenFlushes = 900; // 15 minutes at 10 ticks/sec (100 ms tick)
     private const int MaxLogBufferEntries = 1000;
 
+    private static Clock? _clock;
+    
     private static long _currentCacheSize;
     private static long _lastFlushTick;
     private static bool _initialized;
@@ -43,25 +45,28 @@ public static class DiskManager
         EventManager.Subscribe<RequestFileReadTextEvent>(OnRequestFileReadText);
         EventManager.Subscribe<LogEvents>(OnLogWrite);
         EventManager.Subscribe<SystemShutdownEvent>(OnSystemShutdown);
-        EventManager.Subscribe<TickEvent>(OnTick);
-
+        
         _initialized = true;
-        ClockManager.RegisterClock("DiskManager", 1000);
-        ClockManager.StartClock("DiskManager");
-
+        _clock = ClockManager.RegisterClock("DiskManager", 1000);
+        _clock.OnTick += OnTick;
+        ClockManager.StartClock(_clock);
+        
         Console.WriteLine("[DiskManager]: Initialized.");
     }
 
-    private static void OnTick(TickEvent e)
+    private static void OnTick()
     {
-        if (e.ClockName != "DiskManager")
+        if (_clock == null || !_initialized)
             return;
 
-        if (e.TickNumber - _lastFlushTick >= TicksBetweenFlushes)
+        lock (FileLock)
         {
-            Console.WriteLine("[DiskManager]: Periodic flush interval reached. Flushing buffers.");
-            Flush();
-            _lastFlushTick = e.TickNumber;
+            if (_clock.CurrentTick - _lastFlushTick >= TicksBetweenFlushes)
+            {
+                Console.WriteLine("[DiskManager]: Periodic flush interval reached. Flushing buffers.");
+                Flush();
+                _lastFlushTick = _clock.CurrentTick;
+            }
         }
     }
 
@@ -99,7 +104,8 @@ public static class DiskManager
 
                 if (_currentCacheSize > MaxCacheSizeBytes)
                 {
-                    Console.WriteLine($"[DiskManager]: Cache size exceeded {MaxCacheSizeBytes / (1024 * 1024)} MB. Triggering flush.");
+                    Console.WriteLine(
+                        $"[DiskManager]: Cache size exceeded {MaxCacheSizeBytes / (1024 * 1024)} MB. Triggering flush.");
                     FlushFileCache();
                 }
             }
@@ -418,14 +424,15 @@ public static class DiskManager
 
         ClockManager.StopClock("DiskManager");
         ClockManager.UnregisterClock("DiskManager");
-
+        _clock?.OnTick -= OnTick;
+        _clock = null;
+        
         EventManager.Unsubscribe<RequestFileWriteByteEvent>(OnRequestFileByteWrite);
         EventManager.Unsubscribe<RequestFileWriteTextEvent>(OnRequestFileTextWrite);
         EventManager.Unsubscribe<RequestFileReadEvent>(OnRequestFileRead);
         EventManager.Unsubscribe<RequestFileReadTextEvent>(OnRequestFileReadText);
         EventManager.Unsubscribe<LogEvents>(OnLogWrite);
         EventManager.Unsubscribe<SystemShutdownEvent>(OnSystemShutdown);
-        EventManager.Unsubscribe<TickEvent>(OnTick);
 
         _initialized = false;
         Console.WriteLine("[DiskManager]: Shutdown.");
