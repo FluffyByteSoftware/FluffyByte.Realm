@@ -6,10 +6,7 @@
  *------------------------------------------------------------
  */
 
-using System.Numerics;
-using FluffyByte.Realm.Game.Entities.Primitives;
-
-namespace FluffyByte.Realm.Game.Entities.Components;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 
 public class TransformComponent : GameObjectComponent
 {

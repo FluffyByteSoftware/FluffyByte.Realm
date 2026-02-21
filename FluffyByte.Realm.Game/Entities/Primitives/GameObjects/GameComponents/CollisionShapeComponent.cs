@@ -8,20 +8,18 @@
 
 using FluffyByte.Realm.Game.Entities.Primitives;
 
-namespace FluffyByte.Realm.Game.Entities.Components;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 
 public enum CollisionShapeType
 {
-    Capsule = 0,
-    Sphere = 1,
-    Box = 2,
-    Pyramid = 3,
-    Cone = 4
+    Circle = 0,
+    Rectangle = 1
 }
 
 public class CollisionShapeComponent : GameObjectComponent
 {
-    public CollisionShapeType ShapeType { get; set; } = CollisionShapeType.Capsule;
+    public CollisionShapeType ShapeType { get; set; } = CollisionShapeType.Rectangle;
+    
     
     public override TickType TickType => TickType.Fast;
 

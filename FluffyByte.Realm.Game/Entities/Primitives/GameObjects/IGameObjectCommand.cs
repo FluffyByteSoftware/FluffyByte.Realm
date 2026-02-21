@@ -1,24 +1,21 @@
 /*
- * (RealmZoneShort.cs)
+ * (IGameObjectCommand.cs)
  *------------------------------------------------------------
- * Created - Thursday, February 19, 2026@3:10:46 PM
+ * Created - Friday, February 20, 2026@10:32:49 AM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Primitives;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
-
-public enum RealmZoneShort : int
+public interface IGameObjectCommand
 {
-    AeolithInner = 0,
-    AeolithOuter = 1,
-    SwampOfPegun = 2
+    void Execute(GameObject target);
 }
 
 /*
  *------------------------------------------------------------
- * (RealmZoneShort.cs)
+ * (IGameObjectCommand.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

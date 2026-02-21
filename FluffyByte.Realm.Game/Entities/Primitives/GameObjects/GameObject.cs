@@ -9,7 +9,7 @@
 using System.Collections.Concurrent;
 using FluffyByte.Realm.Tools.Logger;
 
-namespace FluffyByte.Realm.Game.Entities.Primitives;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
 public class GameObject
 {
@@ -18,6 +18,8 @@ public class GameObject
 
     public IGameObjectOwner? Owner { get; private set; }
 
+    public List<string> Tags { get; set; } = [];
+    
     private readonly Dictionary<Type, GameObjectComponent> _components = [];
 
     private readonly Dictionary<TickType, List<GameObjectComponent>> _tickBuckets = new()
@@ -38,6 +40,8 @@ public class GameObject
         {
             Log.Debug($"New game object: {name} is missing an owner.");
         }
+
+        Tags.Add("GameObject");
     }
 
     /// <summary>

@@ -1,23 +1,21 @@
 /*
- * (IGameObjectOwner.cs)
+ * (TileComponent.cs)
  *------------------------------------------------------------
- * Created - Thursday, February 19, 2026@4:40:18 PM
+ * Created - Saturday, February 21, 2026@12:49:56 AM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Primitives;
+namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles.TileComponents;
 
-public interface IGameObjectOwner
+public class TileComponent
 {
-    Guid Id { get; }
-    void AddGameObject(GameObject obj);
-    void RemoveGameObject(GameObject obj);
+    
 }
 
 /*
  *------------------------------------------------------------
- * (IGameObjectOwner.cs)
+ * (TileComponent.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

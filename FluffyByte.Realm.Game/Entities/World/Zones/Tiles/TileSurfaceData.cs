@@ -1,21 +1,21 @@
 /*
- * (IGameObjectCommand.cs)
+ * (TileSurfaceData.cs)
  *------------------------------------------------------------
- * Created - Friday, February 20, 2026@10:32:49 AM
+ * Created - Friday, February 20, 2026@11:54:41 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Primitives;
+namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
-public interface IGameObjectCommand
+public class TileSurfaceData
 {
-    void Execute(GameObject target);
+    
 }
 
 /*
  *------------------------------------------------------------
- * (IGameObjectCommand.cs)
+ * (TileSurfaceData.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

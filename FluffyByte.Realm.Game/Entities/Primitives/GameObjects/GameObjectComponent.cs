@@ -6,7 +6,7 @@
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Primitives;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
 /// <summary>
 /// Represents the base class for components that can be attached to a <see cref="GameObject"/>.
