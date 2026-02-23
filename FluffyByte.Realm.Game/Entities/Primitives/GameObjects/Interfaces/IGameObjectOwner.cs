@@ -1,21 +1,23 @@
 /*
- * (IGameObjectCommand.cs)
+ * (IGameObjectOwner.cs)
  *------------------------------------------------------------
- * Created - Friday, February 20, 2026@10:32:49 AM
+ * Created - Thursday, February 19, 2026@4:40:18 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
 
-public interface IGameObjectCommand
+public interface IGameObjectOwner
 {
-    void Execute(GameObject target);
+    Guid Id { get; }
+    void AddGameObject(GameObject obj);
+    void RemoveGameObject(GameObject obj);
 }
 
 /*
  *------------------------------------------------------------
- * (IGameObjectCommand.cs)
+ * (IGameObjectOwner.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

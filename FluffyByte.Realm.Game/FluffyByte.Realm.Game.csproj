@@ -21,7 +21,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Entities\Complex\" />
+      <Folder Include="Entities\Actors\Agents\" />
+      <Folder Include="Entities\Actors\Players\" />
     </ItemGroup>
         
 </Project>

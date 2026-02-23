@@ -10,6 +10,7 @@ namespace FluffyByte.Realm.Game.Entities.Primitives;
 
 public enum TickType
 {
+    None = -1,
     Fast = 0,
     Normal = 1,
     Slow = 2

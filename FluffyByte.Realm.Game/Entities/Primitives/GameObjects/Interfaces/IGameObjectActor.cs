@@ -1,25 +1,22 @@
 /*
- * (TileTerrainType.cs)
+ * (IGameObjectAgent.cs)
  *------------------------------------------------------------
- * Created - Saturday, February 21, 2026@12:08:19 AM
+ * Created - Friday, February 20, 2026@9:01:01 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles.TerrainInfo;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
 
-public enum TileTerrainType
+public interface IGameObjectActor
 {
-    Paved,
-    Dirt,
-    Vegetation,
-    Crop,
-    Water
+    int FootPrintRadiusSize { get; set; }
+    
 }
 
 /*
  *------------------------------------------------------------
- * (TileTerrainType.cs)
+ * (IGameObjectAgent.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

@@ -10,7 +10,7 @@ namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
 public interface ITileCommand
 {
-    
+    void Execute(RealmTile target);
 }
 
 /*

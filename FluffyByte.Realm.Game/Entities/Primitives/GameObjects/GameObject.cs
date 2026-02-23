@@ -7,6 +7,7 @@
  */
 
 using System.Collections.Concurrent;
+using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
 using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
@@ -79,7 +80,9 @@ public class GameObject
 
         component.Owner = this;
         _components[type] = component;
-        _tickBuckets[component.TickType].Add(component);
+        
+        if(component.TickType != TickType.None)
+            _tickBuckets[component.TickType].Add(component);
     }
 
     public void RemoveComponent<T>() where T : GameObjectComponent

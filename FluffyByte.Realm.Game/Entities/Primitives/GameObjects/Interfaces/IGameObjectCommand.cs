@@ -1,22 +1,21 @@
 /*
- * (IGameObjectAgent.cs)
+ * (IGameObjectCommand.cs)
  *------------------------------------------------------------
- * Created - Friday, February 20, 2026@9:01:01 PM
+ * Created - Friday, February 20, 2026@10:32:49 AM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
 
-public interface IGameObjectAgent
+public interface IGameObjectCommand
 {
-    int FootPrintRadiusSize { get; set; }
-    
+    void Execute(GameObject target);
 }
 
 /*
  *------------------------------------------------------------
- * (IGameObjectAgent.cs)
+ * (IGameObjectCommand.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

@@ -11,20 +11,20 @@ using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
 namespace FluffyByte.Realm.Game.Entities.Events;
 
-public class RealmTileLoadStateChangedEvent
+public class RealmTileLoadStateChangedEvent : EventArgs
 {
     public required RealmTile Tile { get; init; }
     public required RealmTileLoadState OldState { get; init; }
     public required RealmTileLoadState NewState { get; init; }
 }
 
-public class RealmTileEnterTileEvent
+public class RealmTileEnterTileEvent : EventArgs
 {
     public required RealmTile Tile { get; init; }
     public required GameObject ObjectEntering { get; init; }
 }
 
-public class RealmTileExitTileEvent
+public class RealmTileExitTileEvent : EventArgs
 {
     public required RealmTile Tile { get; init; }
     public required GameObject ObjectLeaving { get; init; }

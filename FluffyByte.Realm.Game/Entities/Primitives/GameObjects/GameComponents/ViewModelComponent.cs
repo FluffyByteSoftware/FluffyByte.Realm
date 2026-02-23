@@ -1,32 +1,27 @@
 /*
- * (CollisionShapeComponent.cs)
+ * (ViewModelComponent.cs)
  *------------------------------------------------------------
- * Created - Friday, February 20, 2026@7:55:00 PM
+ * Created - Sunday, February 22, 2026@8:56:07 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-using FluffyByte.Realm.Game.Entities.Primitives;
+using FluffyByte.Realm.Game.Entities.Complex;
 
 namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 
-public class CollisionShapeComponent : GameObjectComponent
+public class ViewModelComponent(
+    PrimitiveModelType primitiveModelType = PrimitiveModelType.Capsule) : GameObjectComponent
 {
-    #region Required
-
     public override TickType TickType => TickType.None;
 
-    #endregion Required
+    public PrimitiveModelType ModelType { get; set; } = primitiveModelType;
 
-    public int FootprintRadius { get; set; } = 0;
-
-    public CollisionShapeComponent(int footprintRadius = 0)
-    {
-        FootprintRadius = footprintRadius;
-    }
+    public ComplexModelType? RealModelType { get; set; }
 
     public override void OnSpawn()
     {
+        
     }
 
     public override void OnDestroy()
@@ -40,12 +35,12 @@ public class CollisionShapeComponent : GameObjectComponent
     }
 
     public override string ToString()
-        => $"CollisionShapeComponent FootprintRadius={FootprintRadius}";
+        => $"ViewModelComponent Model = {ModelType}";
 }
 
 /*
  *------------------------------------------------------------
- * (CollisionShapeComponent.cs)
+ * (ViewModelComponent.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

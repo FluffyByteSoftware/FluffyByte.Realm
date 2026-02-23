@@ -1,21 +1,21 @@
 /*
- * (TileSurfaceData.cs)
+ * (IUniqueActor.cs)
  *------------------------------------------------------------
- * Created - Friday, February 20, 2026@11:54:41 PM
+ * Created - Saturday, February 21, 2026@2:29:18 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
+namespace FluffyByte.Realm.Game.Entities.Actors;
 
-public class TileSurfaceData
+public interface IUniqueActor
 {
-    
+    bool IsUniqueActor { get; }
 }
 
 /*
  *------------------------------------------------------------
- * (TileSurfaceData.cs)
+ * (IUniqueActor.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

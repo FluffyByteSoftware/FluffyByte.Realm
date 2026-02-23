@@ -1,23 +1,27 @@
 /*
- * (IGameObjectOwner.cs)
+ * (PrimitiveModelTypes.cs)
  *------------------------------------------------------------
- * Created - Thursday, February 19, 2026@4:40:18 PM
+ * Created - Sunday, February 22, 2026@8:30:30 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
+namespace FluffyByte.Realm.Game.Entities.Primitives;
 
-public interface IGameObjectOwner
+public enum PrimitiveModelType : byte
 {
-    Guid Id { get; }
-    void AddGameObject(GameObject obj);
-    void RemoveGameObject(GameObject obj);
+    Capsule,
+    Box,
+    Sphere,
+    Pyramid,
+    Cone,
+    Quad,
+    CircleQuad
 }
 
 /*
  *------------------------------------------------------------
- * (IGameObjectOwner.cs)
+ * (PrimitiveModelTypes.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */
