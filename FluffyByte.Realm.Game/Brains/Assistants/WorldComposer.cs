@@ -8,7 +8,6 @@
 
 using FluffyByte.Realm.Game.Entities.Actors;
 using FluffyByte.Realm.Game.Entities.Primitives;
-using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
 using FluffyByte.Realm.Game.Entities.World;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 

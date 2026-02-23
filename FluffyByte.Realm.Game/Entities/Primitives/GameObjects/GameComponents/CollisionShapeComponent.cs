@@ -25,15 +25,6 @@ public class CollisionShapeComponent : GameObjectComponent
         FootprintRadius = footprintRadius;
     }
 
-    public override void OnSpawn()
-    {
-    }
-
-    public override void OnDestroy()
-    {
-        
-    }
-
     public override void Tick()
     {
         

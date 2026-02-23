@@ -49,7 +49,10 @@ public class Actor : GameObject, IGameObjectActor
         PrimitiveModelType modelType = PrimitiveModelType.Capsule,
         int footprintRadius = 0) : base(name, owner)
     {
-        
+        AddComponent(new TransformComponent(startingTile));
+        AddComponent(new ViewModelComponent(modelType));
+        AddComponent(new CollisionShapeComponent(footprintRadius));
+        Tags.Add("Actor");
     }
     #endregion Constructor
     

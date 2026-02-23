@@ -18,17 +18,7 @@ public class ViewModelComponent(
     public PrimitiveModelType ModelType { get; set; } = primitiveModelType;
 
     public ComplexModelType? RealModelType { get; set; }
-
-    public override void OnSpawn()
-    {
-        
-    }
-
-    public override void OnDestroy()
-    {
-        
-    }
-
+    
     public override void Tick()
     {
         
