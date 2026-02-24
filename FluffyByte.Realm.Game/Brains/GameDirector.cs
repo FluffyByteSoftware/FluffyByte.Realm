@@ -13,6 +13,7 @@ using FluffyByte.Realm.Game.Entities.World;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
+using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Game.Brains;
 
@@ -22,7 +23,7 @@ public static class GameDirector
 
     private static WorldComposer _composer = null!;
     private static Metronome _metronome = null!;
-
+    private static ActorRegistrar _actorReg = null!;
     #endregion Assistants
     
     #region Config
@@ -38,12 +39,6 @@ public static class GameDirector
     
     #endregion World
     
-    #region Agent Tracking
-
-    private static readonly Dictionary<IUniqueActor, RealmTile> ActorTiles = [];
-
-    #endregion Agent Tracking
-    
     #region Initialization
 
     private static bool _isInitialized;
@@ -58,6 +53,7 @@ public static class GameDirector
         World = new RealmWorld();
         _composer = new WorldComposer(World);
         _metronome = new Metronome();
+        _actorReg = new ActorRegistrar(_composer);
 
         _isInitialized = true;
         
@@ -71,9 +67,11 @@ public static class GameDirector
     private static void OnSystemStartup(SystemStartupEvent e)
     {
         if (!_isInitialized) return;
-
+        
         World.OnLoad();
         _metronome.Start();
+        
+        Log.Debug($"[GameDirector]: Initialized.");
     }
 
     private static void OnSystemShutdown(SystemShutdownEvent e)
@@ -90,6 +88,7 @@ public static class GameDirector
         World = null!;
         _composer = null!;
         _metronome = null!;
+        _actorReg = null!;
      
         _isInitialized = false;
         
@@ -99,32 +98,14 @@ public static class GameDirector
     #endregion Lifecycle Events
     
     #region Actor Registration
-
     public static void RegisterActor(IUniqueActor actor, RealmTile startingTile)
-    {
-        if (!ActorTiles.TryAdd(actor, startingTile))
-            return;
-
-        _composer.Refresh(ActorTiles);
-    }
+        => _actorReg.RegisterUnique(actor, startingTile);
 
     public static void UnregisterActor(IUniqueActor actor)
-    {
-        if (!ActorTiles.Remove(actor))
-            return;
-
-        _composer.Refresh(ActorTiles);
-    }
+        => _actorReg.UnregisterUnique(actor);
 
     public static void OnAgentMoved(IUniqueActor actor, RealmTile newTile)
-    {
-        if (!ActorTiles.TryGetValue(actor, out var currentTile))
-            return;
-
-        if (currentTile == newTile)
-            return;
-        _composer.Refresh(ActorTiles);
-    }
+        => _actorReg.OnUniqueActorMoved(actor, newTile);
     #endregion Actor Registration
     
     #region Config Management
@@ -138,17 +119,25 @@ public static class GameDirector
     
     #region Tick Handlers
 
+    
     public static void ActiveTick(TickType tickType)
-        => _composer.ActiveTick(tickType);
+    {
+        _actorReg.UpdateIfNeeded();
+        _composer.ActiveTick(tickType);
+    }
 
     public static void WarmTick(TickType tickType)
         => _composer.WarmTick(tickType);
-
+    
+    public static long FastTickCount => _metronome.FastTickCount;
+    public static long NormalTickCount => _metronome.NormalTickCount;
+    public static long SlowTickCount => _metronome.SlowTickCount;
+    
     #endregion Tick Handlers
     
     #region Diagnostics
 
-    public static int ActorCount => ActorTiles.Count;
+    public static int ActorCount => _actorReg.UniqueActorCount;
     public static int HotCount => _composer.HotCount;
     public static int WarmCount => _composer.WarmCount;
 

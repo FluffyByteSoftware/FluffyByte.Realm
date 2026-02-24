@@ -6,6 +6,7 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Game.Entities.Actors.Components;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 
 namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
@@ -17,6 +18,10 @@ public static class GameObjectExtensions
         return go.GetComponent<TransformComponent>();
     }
 
+    public static ActorComponent? GetActor(this GameObject go)
+    {
+        return go.GetComponent<ActorComponent>();
+    }
     public static CollisionShapeComponent? GetCollision(this GameObject go)
     {
         return go.GetComponent<CollisionShapeComponent>();
@@ -30,8 +35,12 @@ public static class GameObjectExtensions
         if (myTransform?.Tile == null || otherTransform?.Tile == null)
             return false;
 
-        return myTransform.Tile == otherTransform.Tile;
+        if (myTransform?.Tile?.Zone == null || otherTransform?.Tile?.Zone == null)
+            return false;
+        
+        return myTransform.Tile.Zone.Id == otherTransform.Tile.Zone.Id;
     }
+    
 }
 
 /*

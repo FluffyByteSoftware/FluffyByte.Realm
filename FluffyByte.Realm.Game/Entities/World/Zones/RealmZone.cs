@@ -9,6 +9,7 @@
 using FluffyByte.Realm.Game.Entities.Events;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 using FluffyByte.Realm.Tools.Broadcasting;
+using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Game.Entities.World.Zones;
 
@@ -32,8 +33,10 @@ public class RealmZone(string name, int worldOffsetX, int worldOffsetZ)
 
     #region Tiles
 
-    public RealmTile[,] Tiles { get; } = new RealmTile[Width, Height];
-
+    private RealmTile[,]? _tiles;
+    public RealmTile[,] Tiles => _tiles ?? throw new InvalidOperationException("Zone not loaded");
+    
+    public bool IsLoaded => _tiles != null;
     #endregion Tiles
 
     #region Neighbors
@@ -48,6 +51,10 @@ public class RealmZone(string name, int worldOffsetX, int worldOffsetZ)
 
     public void OnLoad()
     {
+        if (IsLoaded) return;
+
+        _tiles = new RealmTile[Width, Height];
+        
         for (var x = 0; x < Width; x++)
         for (var z = 0; z < Height; z++)
             Tiles[x, z] = new RealmTile(x, z, WorldOffsetX + x, WorldOffsetZ + z)
@@ -56,16 +63,19 @@ public class RealmZone(string name, int worldOffsetX, int worldOffsetZ)
             };
 
         WireInternalNeighbors();
-
         EventManager.Publish(new RealmZoneLoadedEvent { Zone = this });
+        Log.Debug($"Zone '{Name}' loaded.");
     }
 
     public void OnUnload()
     {
+        if (!IsLoaded) return;
+        
         for (var x = 0; x < Width; x++)
         for (var z = 0; z < Height; z++)
             Tiles[x, z].OnColdUnload();
 
+        _tiles = null;
         EventManager.Publish(new RealmZoneUnloadedEvent { Zone = this });
     }
 
@@ -106,6 +116,9 @@ public class RealmZone(string name, int worldOffsetX, int worldOffsetZ)
     {
         foreach (var neighbor in Neighbors)
         {
+            if (!neighbor.IsLoaded)
+                return;
+            
             for (var x = 0; x < Width; x++)
             for (var z = 0; z < Height; z++)
             {
@@ -146,7 +159,11 @@ public class RealmZone(string name, int worldOffsetX, int worldOffsetZ)
     public RealmTile GetTile(int x, int z) => Tiles[x, z];
 
     public RealmTile? TryGetTile(int x, int z)
-        => x is >= 0 and < Width && z is >= 0 and < Height ? Tiles[x, z] : null;
+    {
+        if (!IsLoaded) return null;
+        
+        return x is >= 0 and < Width && z is >= 0 and < Height ? Tiles[x, z] : null;
+    }
 
     #endregion Tile Access
 

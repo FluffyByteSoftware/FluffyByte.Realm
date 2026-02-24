@@ -1,29 +1,24 @@
 /*
- * (LivingActorEvents.cs)
+ * (UniqueActor.cs)
  *------------------------------------------------------------
- * Created - Monday, February 23, 2026@12:31:24 AM
+ * Created - Tuesday, February 24, 2026@12:13:11 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
+using System.Data.SqlTypes;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
-namespace FluffyByte.Realm.Game.Entities.Actors.Events;
+namespace FluffyByte.Realm.Game.Entities.Actors;
 
-public class ActorSpawnEvent : EventArgs
+public class UniqueActor(string name) : GameObject(name), IUniqueActor
 {
-    public DateTime SpawnTime { get; init; } = DateTime.UtcNow;
-    
-}
-
-public class ActorDiedEvent : EventArgs
-{
-    public GameObject Actor { get; set; } = null!;
+    public bool IsUniqueActor => true;
 }
 
 /*
  *------------------------------------------------------------
- * (LivingActorEvents.cs)
+ * (UniqueActor.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

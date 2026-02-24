@@ -70,6 +70,9 @@ public class Health : GameObjectComponent
             Log.Warn($"[Health Component]: Owner is null during OnDeath.");
             return;
         }
+
+        if (!Owner.HasComponent<ActorComponent>())
+            return;
         
         EventManager.Publish(new ActorDiedEvent() { Actor = Owner });
     }

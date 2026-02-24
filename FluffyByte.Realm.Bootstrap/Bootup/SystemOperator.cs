@@ -7,13 +7,11 @@
  */
 
 using FluffyByte.Realm.Game.Brains;
-using FluffyByte.Realm.Game.Clocks;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Networking.Server;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Disk;
-using FluffyByte.Realm.Tools.Heartbeats;
 
 namespace FluffyByte.Realm.Bootstrap.Bootup;
 
@@ -26,7 +24,6 @@ public static class SystemOperator
         PacketManager.Initialize();
         AccountManager.Initialize();
         ClientManager.Initialize();
-        GameTickManager.Initialize();
         GameDirector.Initialize();
         
     }

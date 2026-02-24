@@ -8,6 +8,7 @@
 
 using System.Diagnostics;
 using FluffyByte.Realm.Game.Entities.Primitives;
+using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Game.Brains.Assistants;
 
@@ -26,7 +27,7 @@ namespace FluffyByte.Realm.Game.Brains.Assistants;
 /// Exposes static interval values so RealmTile.OnWarmLoad() can compute missed ticks
 /// from ColdSince without needing a direct reference to the Metronome.
 /// </summary>
-public class Metronome
+public class Metronome : IDisposable
 {
     #region Static Interval Shortcuts
 
@@ -66,10 +67,14 @@ public class Metronome
     public long NormalTickCount { get; private set; }
     public long SlowTickCount { get; private set; }
 
+    private const int MaxCatchupTicks = 3;
+    
     #endregion Tick Counters
 
     #region Lifecycle
 
+    private bool _isDisposing;
+    
     /// <summary>
     /// Starts the Metronome on a dedicated background thread.
     /// Syncs static interval shortcuts from config so tile math stays accurate.
@@ -93,6 +98,7 @@ public class Metronome
             Priority = ThreadPriority.AboveNormal
         };
 
+        Log.Debug($"[GameDirector]: Starting Metronome on thread {_thread.ManagedThreadId}");
         _thread.Start();
     }
 
@@ -111,6 +117,19 @@ public class Metronome
         _cts = null;
     }
 
+    public void Dispose()
+    {
+        if (_isDisposing)
+            return;
+        
+        _isDisposing = true;
+
+        if (_running)
+            Stop();
+        
+        _cts = null;
+        _thread = null;
+    }
     #endregion Lifecycle
 
     #region Loop
@@ -129,7 +148,12 @@ public class Metronome
             _fastAccumulatorMs += deltaMs;
             _normalAccumulatorMs += deltaMs;
             _slowAccumulatorMs += deltaMs;
-
+            
+            // Cap it to prevent a death cycle
+            _fastAccumulatorMs = Math.Min(_fastAccumulatorMs, FastIntervalMs * MaxCatchupTicks);
+            _normalAccumulatorMs = Math.Min(_normalAccumulatorMs, NormalIntervalMs * MaxCatchupTicks);
+            _slowAccumulatorMs = Math.Min(_slowAccumulatorMs, SlowIntervalMs * MaxCatchupTicks);
+            
             while (_fastAccumulatorMs >= FastIntervalMs)
             {
                 _fastAccumulatorMs -= FastIntervalMs;
@@ -141,23 +165,36 @@ public class Metronome
                 _normalAccumulatorMs -= NormalIntervalMs;
                 FireTick(TickType.Normal);
             }
-
+            
             while (_slowAccumulatorMs >= SlowIntervalMs)
             {
                 _slowAccumulatorMs -= SlowIntervalMs;
                 FireTick(TickType.Slow);
             }
 
-            // Sleep at half the fast interval — tight enough to not miss ticks,
-            // loose enough to avoid busy-waiting the CPU.
             var sleepMs = FastIntervalMs / 2;
-            if (sleepMs > 0)
-                Thread.Sleep(sleepMs);
+            var nextWakeTime = stopwatch.Elapsed + TimeSpan.FromMilliseconds(FastIntervalMs / 2.0);
+            if (sleepMs > 2)
+                Thread.Sleep(sleepMs - 2);
+
+            while (stopwatch.Elapsed < nextWakeTime)
+                Thread.SpinWait(10);
         }
     }
 
-    private static void FireTick(TickType tickType)
+    private void FireTick(TickType tickType)
     {
+        switch (tickType)
+        {
+            case TickType.Fast      : FastTickCount++;        break;
+            case TickType.Normal    : NormalTickCount++;      break;
+            case TickType.Slow      : SlowTickCount++;        break;
+            case TickType.None:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(tickType), tickType, null);
+        }
+        
         GameDirector.ActiveTick(tickType);
         GameDirector.WarmTick(tickType);
     }

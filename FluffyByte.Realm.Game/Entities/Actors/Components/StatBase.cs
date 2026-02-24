@@ -10,7 +10,7 @@ namespace FluffyByte.Realm.Game.Entities.Actors.Components;
 
 public class StatBase
 {
-    public byte Base { get; set; } = 10;
+    public int Base { get; set; } = 10;
     public int Equipment { get; set; } = 0;
     public int Temporary { get; set; } = 0;
 

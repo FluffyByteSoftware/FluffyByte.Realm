@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Clocks\" />
       <Folder Include="Entities\Actors\Agents\" />
       <Folder Include="Entities\Actors\Players\" />
     </ItemGroup>

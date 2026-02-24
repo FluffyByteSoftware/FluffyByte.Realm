@@ -13,6 +13,8 @@ namespace FluffyByte.Realm.Game.Entities.Actors.Components;
 
 public class ActorComponent : GameObjectComponent
 {
+    public bool IsActor { get; private set; } = true;
+
     public override TickType TickType => TickType.None;
 
     public override void Tick()

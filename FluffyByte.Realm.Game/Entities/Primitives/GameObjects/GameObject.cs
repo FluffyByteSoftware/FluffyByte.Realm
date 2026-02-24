@@ -8,7 +8,6 @@
 
 using System.Collections.Concurrent;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
-using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
@@ -16,9 +15,7 @@ public class GameObject
 {
     public Guid Id { get; }
     public string Name { get; }
-
-    public IGameObjectOwner? Owner { get; private set; }
-
+    
     public List<string> Tags { get; set; } = [];
     
     private readonly Dictionary<Type, GameObjectComponent> _components = [];
@@ -32,15 +29,9 @@ public class GameObject
 
     private readonly ConcurrentQueue<IGameObjectCommand> _commandQueue = [];
 
-    public GameObject(string name, IGameObjectOwner? owner = null)
+    public GameObject(string name)
     {
         Name = name;
-        Owner = owner;
-
-        if(Owner == null)
-        {
-            Log.Debug($"New game object: {name} is missing an owner.");
-        }
 
         Tags.Add("GameObject");
     }
@@ -128,13 +119,6 @@ public class GameObject
         
         foreach (var component in _tickBuckets[tickType])
             component.Tick();
-    }
-
-    public void TransferOwnership(IGameObjectOwner newOwner)
-    {
-        Owner?.RemoveGameObject(this);
-        Owner = newOwner;
-        newOwner.AddGameObject(this);
     }
 
     public override string ToString()
