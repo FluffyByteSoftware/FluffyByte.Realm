@@ -6,6 +6,8 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Game.Brains;
+using FluffyByte.Realm.Game.Clocks;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Networking.Server;
 using FluffyByte.Realm.Tools.Broadcasting;
@@ -24,6 +26,9 @@ public static class SystemOperator
         PacketManager.Initialize();
         AccountManager.Initialize();
         ClientManager.Initialize();
+        GameTickManager.Initialize();
+        GameDirector.Initialize();
+        
     }
 
     public static void StartSystem()

@@ -190,7 +190,7 @@ public class RealmTile
 
     public void OnTileEntered(GameObject enteringObject)
     {
-        if (enteringObject.GetType() == typeof(IUniqueActor))
+        if (enteringObject is IUniqueActor)
             TrySetAgent(enteringObject);
 
         EventManager.Publish(new RealmTileEnterTileEvent
@@ -202,7 +202,7 @@ public class RealmTile
 
     public void OnTileExited(GameObject exitingObject)
     {
-        if (exitingObject.GetType() == typeof(IUniqueActor))
+        if (exitingObject is IUniqueActor)
             ClearAgent(exitingObject);
 
         EventManager.Publish(new RealmTileExitTileEvent
