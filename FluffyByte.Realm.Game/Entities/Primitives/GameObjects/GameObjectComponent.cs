@@ -66,7 +66,9 @@ public abstract class GameObjectComponent
     /// Derived classes must implement this method to define the specific behavior of the component
     /// during a tick cycle.
     /// </summary>
-    public abstract void Tick();
+    public virtual void Tick()
+    {
+    }
 }
 
 /*

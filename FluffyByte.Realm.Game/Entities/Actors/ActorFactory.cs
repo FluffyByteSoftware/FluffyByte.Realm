@@ -6,123 +6,115 @@
  *------------------------------------------------------------
  */
 
-using System.Text;
 using FluffyByte.Realm.Game.Entities.Actors.Components;
-using FluffyByte.Realm.Game.Entities.Primitives;
+using FluffyByte.Realm.Game.Entities.Complex;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
-using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
-using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
 namespace FluffyByte.Realm.Game.Entities.Actors;
 
 public static class ActorFactory
 {
-    public static IUniqueActor CreateUniqueActor(string name,
-        int health = 100, int mana = 100,
-        int strength = 10, int dexterity = 10, int constitution = 10,
-        int intelligence = 10, int wisdom = 10, int charisma = 10,
-        RealmTile? startingTile = null,
-        PrimitiveModelType modelType = PrimitiveModelType.Capsule,
-        int footPrintRadius = 1)
+    public static GameObject CreateActor(ActorTemplate template)
     {
-        var actor = new UniqueActor(name);
+        var newActor = CreateCoreActor(template);
         
-        actor.AddComponent(new ActorComponent());
-        actor.AddComponent(new TransformComponent(startingTile));
-        actor.AddComponent(new ViewModelComponent(modelType));
-        actor.AddComponent(new CollisionShapeComponent(footPrintRadius));
-        actor.AddComponent(new Health() { Current = health, Max = health});
-        actor.AddComponent(new Mana() { Current = mana, Max = mana});
-        actor.AddComponent(new HealthRegeneration());
-
-        var stats = new ActorStats
-        {
-            Strength =
-            {
-                Base = (byte)strength
-            },
-            Dexterity =
-            {
-                Base = (byte)dexterity
-            },
-            Constitution =
-            {
-                Base = (byte)constitution
-            },
-            Intelligence =
-            {
-                Base = (byte)intelligence
-            },
-            Wisdom =
-            {
-                Base = (byte)wisdom
-            },
-            Charisma =
-            {
-                Base = (byte)charisma
-            }
-        };
-
-        actor.AddComponent(stats);
-        // add any other components that distinguish a living actor from other forms
-
-        startingTile?.OnTileEntered(actor);
-
-        return actor;
+        return newActor;
     }
     
-    public static GameObject CreateLivingActor(string name,
-        int health = 100, int mana = 100,
-        int strength = 10, int dexterity = 10, int constitution = 10,
-        int intelligence = 10, int wisdom = 10, int charisma = 10,
-        RealmTile? startingTile = null,
-        PrimitiveModelType modelType = PrimitiveModelType.Capsule,
-        int footPrintRadius = 1)
+    public static GameObject CreateWorldBoss(ActorTemplate template)
     {
-        var actor = new GameObject(name);
+        var newActor = CreateCoreActor(template);
+        
+        newActor.UniqueObjectType = UniqueObjectType.WorldBoss;
+        
+        return newActor;
+    }
 
-        actor.AddComponent(new ActorComponent());
-        actor.AddComponent(new TransformComponent(startingTile));
-        actor.AddComponent(new ViewModelComponent(modelType));
-        actor.AddComponent(new CollisionShapeComponent(footPrintRadius));
-        actor.AddComponent(new Health() { Current = health, Max = health});
-        actor.AddComponent(new Mana() { Current = mana, Max = mana});
-        actor.AddComponent(new HealthRegeneration());
+    public static GameObject CreatePlayerActor(ActorTemplate template)
+    {
+        var newPlayer = CreateCoreActor(template);
+        
+        newPlayer.UniqueObjectType = UniqueObjectType.Player;
+        
+        return newPlayer;
+    }
 
-        var stats = new ActorStats
+    public static GameObject CreateEliteActor(ActorTemplate template)
+    {
+        var newActor = CreateCoreActor(template);
+        
+        newActor.UniqueObjectType = UniqueObjectType.EliteNPC;
+        
+        return newActor;
+    }
+
+    private static GameObject CreateCoreActor(ActorTemplate template)
+    {
+        
+        var actor = new GameObject(template.Name);
+        
+        actor.AddComponent(new TransformComponent());
+
+        var viewComp = new ViewModelComponent(template.ModelType)
+        {
+            RealModelType = ComplexModelType.DefaultMasculine
+        };
+
+        actor.AddComponent(viewComp);
+
+        var collision = new CollisionShapeComponent() { FootprintRadius = template.FootprintRadius };
+        actor.AddComponent(collision);
+        
+        var actorStats = new ActorStats
         {
             Strength =
             {
-                Base = (byte)strength
+                Base = template.Strength
             },
             Dexterity =
             {
-                Base = (byte)dexterity
+                Base = template.Dexterity
             },
             Constitution =
             {
-                Base = (byte)constitution
+                Base = template.Constitution
             },
             Intelligence =
             {
-                Base = (byte)intelligence
+                Base = template.Intelligence
             },
             Wisdom =
             {
-                Base = (byte)wisdom
+                Base = template.Wisdom
             },
             Charisma =
             {
-                Base = (byte)charisma
+                Base = template.Charisma
             }
         };
 
-        // add any other components that distinguish a living actor from other forms
-        actor.AddComponent(stats);
+        actor.AddComponent(actorStats);
+        
+        var health = new Health()
+        {
+            Current = 1,
+            Max = 100
+        };
+        
+        actor.AddComponent(health);
+        
+        var healthRegen = new HealthRegeneration()
+        {
+            RegenAmount = 1,
+            RegenIntervalSeconds = 2,
+            RegenMultiplier = 1
+        };
+        
+        actor.AddComponent(healthRegen);
 
-        if (startingTile != null)
-            startingTile.OnTileEntered(actor);
+        var actComp = new ActorComponent();
+        actor.AddComponent(actComp);
         
         return actor;
     }

@@ -63,6 +63,12 @@ public class Health : GameObjectComponent
         
     }
 
+    public void Adjust(int amount)
+    {
+        Current += amount;
+        CheckCurrent();
+    }
+    
     private void OnDeath()
     {
         if (Owner is null)

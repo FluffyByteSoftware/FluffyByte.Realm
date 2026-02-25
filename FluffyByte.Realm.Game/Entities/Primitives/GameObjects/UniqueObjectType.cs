@@ -1,21 +1,24 @@
 /*
- * (IUniqueActor.cs)
+ * (UniqueObjectType.cs)
  *------------------------------------------------------------
- * Created - Saturday, February 21, 2026@2:29:18 PM
+ * Created - Tuesday, February 24, 2026@9:14:13 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Entities.Actors;
+namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
-public interface IUniqueActor
+public enum UniqueObjectType
 {
-    bool IsUniqueActor { get; }
+    None = 0,
+    Player = 1,
+    EliteNPC = 2,
+    WorldBoss = 3
 }
 
 /*
  *------------------------------------------------------------
- * (IUniqueActor.cs)
+ * (UniqueObjectType.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

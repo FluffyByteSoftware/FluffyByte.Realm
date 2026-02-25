@@ -28,6 +28,7 @@ public class OnNetworkReceivedEvent : EventArgs
 public class OnAuthenticationSuccessEvent : EventArgs
 {
     public RealmClient Client { get; set; } = null!;
+    public string AccountName { get; set; } = null!;
 }
 
 

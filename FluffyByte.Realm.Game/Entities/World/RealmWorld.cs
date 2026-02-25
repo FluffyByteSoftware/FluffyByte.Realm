@@ -116,10 +116,16 @@ public class RealmWorld
 
     public RealmTile? TryGetTile(int globalX, int globalZ)
     {
-        var zone = TryGetZone(globalX, globalZ);
-        if (zone is null || !zone.IsLoaded)
-            return null;
+        var zone = TryGetZone(globalX, globalZ) ??
+                   throw new ArgumentOutOfRangeException(
+                       $"[RealmWorld]: Global tile ({globalX},{globalZ}) is out of bounds.");
 
+        if (!zone.IsLoaded)
+        {
+            zone.OnLoad();
+            zone.WireBorderNeighbors();
+        }
+        
         var localX = globalX % RealmZone.Width;
         var localZ = globalZ % RealmZone.Height;
 

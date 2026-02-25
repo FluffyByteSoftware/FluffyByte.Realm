@@ -6,37 +6,52 @@
  *------------------------------------------------------------
  */
 
-using FluffyByte.Realm.Game.Entities.Actors;
+using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
 namespace FluffyByte.Realm.Game.Brains.Assistants;
 
 /// <summary>
-/// ActorRegistrar is the GameDirector's assistant responsible for tracking
-/// the tile positions of all IUniqueActor instances in the world.
-///
-/// It owns the actor-to-tile dictionary, the read/write lock, and the dirty flag.
-/// When an actor's state changes, it marks itself dirty. On UpdateIfNeeded(), it snapshots
-/// the current state and triggers a WorldComposer refresh, keeping tile warming
-/// accurate without blocking the Metronome thread.
+/// Manages the registration and tracking of unique actors (game objects) and their corresponding positions
+/// (tiles) within the game world. Provides functionality to add, remove, update, and retrieve information
+/// about unique actors and their locations. Synchronizes the state changes with the provided
+/// <see cref="WorldComposer"/> instance.
 /// </summary>
+/// <remarks>
+/// This class ensures thread-safe operations using read/write locks for managing the registration
+/// data. Additionally, it tracks if the state has changed and updates the associated composer
+/// only when necessary to reduce overhead.
+/// </remarks>
+/// <example>
+/// This class does not provide usage examples.
+/// </example>
 public class ActorRegistrar(WorldComposer composer)
 {
     #region State
 
     private readonly ReaderWriterLockSlim _lock = new();
-    private readonly Dictionary<IUniqueActor, RealmTile> _uniqueActorTiles = [];
+    private readonly Dictionary<GameObject, RealmTile> _uniqueActorTiles = [];
     private volatile bool _isDirty;
 
     #endregion State
 
     #region Registration
 
-    public void RegisterUnique(IUniqueActor actor, RealmTile startingTile)
+    /// <summary>
+    /// Registers a unique actor (game object) within the game world and associates it with a specified starting tile.
+    /// If the actor is already registered, the operation is ignored. Updates the state to reflect the change.
+    /// </summary>
+    /// <param name="actor">The game object representing the unique actor to register.</param>
+    public void RegisterUnique(GameObject actor)
     {
         _lock.EnterWriteLock();
         try
         {
+            var startingTile = actor.GetTransform()?.Tile;
+            
+            if (startingTile == null)
+                return;
+            
             if (!_uniqueActorTiles.TryAdd(actor, startingTile))
                 return;
         }
@@ -48,7 +63,13 @@ public class ActorRegistrar(WorldComposer composer)
         _isDirty = true;
     }
 
-    public void UnregisterUnique(IUniqueActor actor)
+    /// <summary>
+    /// Unregisters a previously registered unique actor from the game world.
+    /// If the actor is not currently registered, the operation is ignored.
+    /// Marks the state as changed to trigger any necessary updates.
+    /// </summary>
+    /// <param name="actor">The game object representing the unique actor to unregister.</param>
+    public void UnregisterUnique(GameObject actor)
     {
         _lock.EnterWriteLock();
         try
@@ -64,15 +85,22 @@ public class ActorRegistrar(WorldComposer composer)
         _isDirty = true;
     }
 
-    public void OnUniqueActorMoved(IUniqueActor actor, RealmTile newTile)
+    public void OnUniqueActorMoved(GameObject actor)
     {
         _lock.EnterWriteLock();
+        
         try
         {
-            if (!_uniqueActorTiles.TryGetValue(actor, out var currentTile) || currentTile == newTile)
+            if (!_uniqueActorTiles.TryGetValue(actor, out var currentTile))
                 return;
+            
+            var newTile = actor.GetTransform()?.Tile;
 
+            if (newTile == null || newTile == currentTile)
+                return;
+            
             _uniqueActorTiles[actor] = newTile;
+            
             _isDirty = true;
         }
         finally
@@ -89,12 +117,12 @@ public class ActorRegistrar(WorldComposer composer)
     {
         if (!_isDirty) return;
 
-        Dictionary<IUniqueActor, RealmTile> snapshot;
+        Dictionary<GameObject, RealmTile> snapshot;
 
         _lock.EnterReadLock();
         try
         {
-            snapshot = new Dictionary<IUniqueActor, RealmTile>(_uniqueActorTiles);
+            snapshot = new Dictionary<GameObject, RealmTile>(_uniqueActorTiles);
         }
         finally
         {

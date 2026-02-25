@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\FluffyByte.Realm.Game\FluffyByte.Realm.Game.csproj" />
+      <ProjectReference Include="..\FluffyByte.Realm.Networking\FluffyByte.Realm.Networking.csproj" />
       <ProjectReference Include="..\FluffyByte.Realm.Tools\FluffyByte.Realm.Tools.csproj" />
     </ItemGroup>
 

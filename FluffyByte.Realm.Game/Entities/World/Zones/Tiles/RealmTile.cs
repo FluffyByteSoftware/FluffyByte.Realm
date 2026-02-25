@@ -8,7 +8,6 @@
 
 using System.Collections.Concurrent;
 using FluffyByte.Realm.Game.Brains.Assistants;
-using FluffyByte.Realm.Game.Entities.Actors;
 using FluffyByte.Realm.Game.Entities.Actors.Components;
 using FluffyByte.Realm.Game.Entities.Events;
 using FluffyByte.Realm.Game.Entities.Primitives;
@@ -48,8 +47,6 @@ public class RealmTile
     #region Occupants
 
     public GameObject? Agent { get; private set; }
-    private readonly List<GameObject> _npcs = [];
-    public IReadOnlyList<GameObject> Npcs => _npcs;
     
     public List<GameObject> Items { get; } = [];
 
@@ -193,14 +190,14 @@ public class RealmTile
 
     public void OnTileEntered(GameObject enteringObject)
     {
-        if (enteringObject.GetType() == typeof(UniqueActor))
+        if (enteringObject.GetActor() == null)
+        {
+            Items.Add(enteringObject);
+        }
+        else
         {
             TrySetAgent(enteringObject);
         }
-        else if (enteringObject.HasComponent<ActorComponent>())
-            _npcs.Add(enteringObject);
-        else
-            Items.Add(enteringObject);
 
         EventManager.Publish(new RealmTileEnterTileEvent
         {
@@ -211,17 +208,15 @@ public class RealmTile
 
     public void OnTileExited(GameObject exitingObject)
     {
-        if (exitingObject.GetType() == typeof(UniqueActor))
-        {
-            ClearAgent(exitingObject);
-        }
-        else if (exitingObject.HasComponent<ActorComponent>())
-            _npcs.Remove(exitingObject);
-        else
+        if (exitingObject.GetActor() == null)
         {
             Items.Remove(exitingObject);
         }
-
+        else
+        {
+            ClearAgent(exitingObject);
+        }
+        
         EventManager.Publish(new RealmTileExitTileEvent
         {
             Tile          = this,
@@ -292,9 +287,6 @@ public class RealmTile
             DrainCommands();
 
         Agent?.Tick(tickType);
-
-        foreach (var npc in _npcs)
-            npc.Tick(tickType);
         
         foreach (var item in Items)
             item.Tick(tickType);

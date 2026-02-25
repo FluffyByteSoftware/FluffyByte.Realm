@@ -92,6 +92,7 @@ public static class NewClientManager
             
             var failedResponse = new AuthenticationServerResponsePacket()
             {
+                CreatedAt = DateTime.UtcNow,
                 Success = false
             };
 
@@ -105,12 +106,17 @@ public static class NewClientManager
         
         var respond = new AuthenticationServerResponsePacket()
         {
+            CreatedAt = DateTime.UtcNow,
             Success = true
         };
 
         client.SendPacket(PacketType.AuthenticationServerResponsePacket, respond);
 
-        EventManager.Publish(new OnAuthenticationSuccessEvent() { Client = client });
+        EventManager.Publish(new OnAuthenticationSuccessEvent()
+        {
+            AccountName = packet.Username,
+            Client = client
+        });
     }
 }
 

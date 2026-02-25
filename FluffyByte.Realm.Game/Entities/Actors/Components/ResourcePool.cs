@@ -50,11 +50,7 @@ public abstract class ResourcePool : GameObjectComponent
         if (_current > _max)
             _current = _max;
     }
-
-    public override void Tick()
-    {
-        
-    }
+    
 }
 
 /*

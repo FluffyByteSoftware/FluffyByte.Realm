@@ -27,6 +27,21 @@ public static class GameObjectExtensions
         return go.GetComponent<CollisionShapeComponent>();
     }
 
+    public static Health? GetHealth(this GameObject go)
+    {
+        return go.GetComponent<Health>();
+    }
+
+    public static ActorStats? GetStats(this GameObject go)
+    {
+        return go.GetComponent<ActorStats>();
+    }
+
+    public static HealthRegeneration? HealthRegeneration(this GameObject go)
+    {
+        return go.GetComponent<HealthRegeneration>();
+    }
+
     public static bool IsInSameZoneAs(this GameObject me, GameObject other)
     {
         var myTransform = me.GetTransform();

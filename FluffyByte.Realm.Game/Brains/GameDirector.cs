@@ -7,8 +7,11 @@
  */
 
 using FluffyByte.Realm.Game.Brains.Assistants;
-using FluffyByte.Realm.Game.Entities.Actors;
+using FluffyByte.Realm.Game.Entities.Actors.Components;
+using FluffyByte.Realm.Game.Entities.Actors.Players;
 using FluffyByte.Realm.Game.Entities.Primitives;
+using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
+using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 using FluffyByte.Realm.Game.Entities.World;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 using FluffyByte.Realm.Tools.Broadcasting;
@@ -24,6 +27,7 @@ public static class GameDirector
     private static WorldComposer _composer = null!;
     private static Metronome _metronome = null!;
     private static ActorRegistrar _actorReg = null!;
+    private static PlayerRegistrar _playerRegistrar = null!;
     #endregion Assistants
     
     #region Config
@@ -54,7 +58,8 @@ public static class GameDirector
         _composer = new WorldComposer(World);
         _metronome = new Metronome();
         _actorReg = new ActorRegistrar(_composer);
-
+        _playerRegistrar = new PlayerRegistrar();
+        
         _isInitialized = true;
         
         EventManager.Subscribe<SystemStartupEvent>(OnSystemStartup);
@@ -89,7 +94,9 @@ public static class GameDirector
         _composer = null!;
         _metronome = null!;
         _actorReg = null!;
-     
+
+        _playerRegistrar.SaveAll();
+        
         _isInitialized = false;
         
         EventManager.Unsubscribe<SystemStartupEvent>(OnSystemStartup);
@@ -98,15 +105,84 @@ public static class GameDirector
     #endregion Lifecycle Events
     
     #region Actor Registration
-    public static void RegisterActor(IUniqueActor actor, RealmTile startingTile)
-        => _actorReg.RegisterUnique(actor, startingTile);
+    public static void RegisterUniqueActor(GameObject actor)
+        => _actorReg.RegisterUnique(actor);
 
-    public static void UnregisterActor(IUniqueActor actor)
+    public static void UnregisterUniqueActor(GameObject actor)
         => _actorReg.UnregisterUnique(actor);
 
-    public static void OnAgentMoved(IUniqueActor actor, RealmTile newTile)
-        => _actorReg.OnUniqueActorMoved(actor, newTile);
+    public static void OnUniqueActorMoved(GameObject actor)
+        => _actorReg.OnUniqueActorMoved(actor);
+    
     #endregion Actor Registration
+    
+    #region Player Registration
+
+    public static void SavePlayerProfiles() => _playerRegistrar.SaveAll();
+    
+    public static void CreatePlayerProfile(string name) => _playerRegistrar.CreateProfile(name);
+    
+    public static void SavePlayerProfile(PlayerProfile profile) => _playerRegistrar.Save(profile);
+    
+    public static PlayerProfile? GetPlayerProfile(string name) => _playerRegistrar.GetByName(name);
+    public static PlayerProfile? GetPlayerProfile(Guid id) => _playerRegistrar.GetById(id);
+    
+    public static bool PlayerProfileExists(string name) => _playerRegistrar.ProfileExists(name);
+    
+    #endregion Player Registration
+    
+    #region Object Spawn
+    
+    public static RealmTile? WakeBeforeSpawn(int globalX, int globalZ)
+    {
+        var zone = World.TryGetZone(globalX, globalZ);
+        if (zone is null) return null;
+
+        if (!zone.IsLoaded)
+        {
+            zone.OnLoad();
+            zone.WireBorderNeighbors();
+        }
+
+        return World.TryGetTile(globalX, globalZ);
+    }
+    
+    public static void SpawnGameObject(GameObject objectToSpawn, RealmTile tile)
+    {
+        WakeBeforeSpawn(tile.GlobalX, tile.GlobalZ);
+
+        var transform = objectToSpawn.GetComponent<TransformComponent>();
+
+        if (transform == null)
+        {
+            Log.Warn($"[GameDirector]: Spawn request for {objectToSpawn.Name} does not have a TransformComponent. " +
+                     $"Cannot spawn.");
+            return;
+        }
+
+        if (objectToSpawn.HasComponent<ActorComponent>())
+        {
+            if (tile.HasAgent)
+            {
+                Log.Warn($"[GameDirector]: Cannot spawn {objectToSpawn.Name} on tile " +
+                         $"{tile.GlobalX},{tile.GlobalZ} because it already has an agent.");
+                Log.Warn($"[GameDirector]: {objectToSpawn.Name} will not be spawned.");
+                return;
+            }
+        }
+        
+        transform.Tile = tile;
+
+        tile.OnTileEntered(objectToSpawn);
+        objectToSpawn.OnSpawn();
+
+        if (objectToSpawn.UniqueObjectType != UniqueObjectType.None)
+            _actorReg.RegisterUnique(objectToSpawn);
+        
+        
+    }
+    
+    #endregion Object Spawn
     
     #region Config Management
 

@@ -12,6 +12,13 @@ namespace FluffyByte.Realm.Game.Brains;
 
 public class GameDirectorConfig
 {
+    #region Character Data
+
+    public string CharacterDataPath { get; set; } = @"E:\FluffyByte\Builds\0.0.1\ServerData\Characters";
+    
+
+    #endregion Character Data
+    
     #region Tick Intervals (milliseconds)
 
     public int FastIntervalMs { get; set; } = 20;

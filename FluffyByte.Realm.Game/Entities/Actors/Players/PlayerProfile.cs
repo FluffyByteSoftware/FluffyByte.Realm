@@ -1,29 +1,24 @@
 /*
- * (GuildPoints.cs)
+ * (PlayerProfile.cs)
  *------------------------------------------------------------
- * Created - Monday, February 23, 2026@9:47:40 AM
+ * Created - Tuesday, February 24, 2026@10:56:12 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Game.Entities.Complex;
 using FluffyByte.Realm.Game.Entities.Primitives;
-using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
-namespace FluffyByte.Realm.Game.Entities.Actors.Components;
+namespace FluffyByte.Realm.Game.Entities.Actors.Players;
 
-public class Mana : ResourcePool
+public class PlayerProfile : ActorTemplate
 {
-    public override TickType TickType => TickType.None;
-    
-    public override void Tick()
-    {
-        
-    }
+    public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
 /*
  *------------------------------------------------------------
- * (GuildPoints.cs)
+ * (PlayerProfile.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

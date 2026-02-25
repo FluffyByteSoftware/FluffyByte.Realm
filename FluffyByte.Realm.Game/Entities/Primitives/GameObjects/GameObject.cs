@@ -14,7 +14,15 @@ namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 public class GameObject
 {
     public Guid Id { get; }
+    public string GuidId => $"GameObject_{Id}";
+
+    public UniqueObjectType UniqueObjectType = UniqueObjectType.None;
+    
     public string Name { get; }
+
+    public long NetworkId { get; private set; }
+    
+    private static long _nextNetworkId = 0;
     
     public List<string> Tags { get; set; } = [];
     
@@ -33,7 +41,12 @@ public class GameObject
     {
         Name = name;
 
+        Id = Guid.NewGuid();
+        
         Tags.Add("GameObject");
+        
+       
+        NetworkId = Interlocked.Increment(ref _nextNetworkId);
     }
 
     /// <summary>
