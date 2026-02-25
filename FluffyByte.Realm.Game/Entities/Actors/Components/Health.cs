@@ -74,6 +74,11 @@ public class Health : GameObjectComponent
         if (!Owner.HasComponent<ActorComponent>())
             return;
         
+        var healthRegen = Owner.GetComponent<HealthRegeneration>();
+
+        if (healthRegen != null)
+            healthRegen.Freeze = true;
+        
         EventManager.Publish(new ActorDiedEvent() { Actor = Owner });
     }
 }

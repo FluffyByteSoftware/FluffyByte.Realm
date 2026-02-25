@@ -34,6 +34,7 @@ public static class ActorFactory
         actor.AddComponent(new CollisionShapeComponent(footPrintRadius));
         actor.AddComponent(new Health() { Current = health, Max = health});
         actor.AddComponent(new Mana() { Current = mana, Max = mana});
+        actor.AddComponent(new HealthRegeneration());
 
         var stats = new ActorStats
         {
@@ -63,7 +64,10 @@ public static class ActorFactory
             }
         };
 
+        actor.AddComponent(stats);
         // add any other components that distinguish a living actor from other forms
+
+        startingTile?.OnTileEntered(actor);
 
         return actor;
     }
@@ -84,6 +88,7 @@ public static class ActorFactory
         actor.AddComponent(new CollisionShapeComponent(footPrintRadius));
         actor.AddComponent(new Health() { Current = health, Max = health});
         actor.AddComponent(new Mana() { Current = mana, Max = mana});
+        actor.AddComponent(new HealthRegeneration());
 
         var stats = new ActorStats
         {
@@ -114,7 +119,11 @@ public static class ActorFactory
         };
 
         // add any other components that distinguish a living actor from other forms
+        actor.AddComponent(stats);
 
+        if (startingTile != null)
+            startingTile.OnTileEntered(actor);
+        
         return actor;
     }
 }

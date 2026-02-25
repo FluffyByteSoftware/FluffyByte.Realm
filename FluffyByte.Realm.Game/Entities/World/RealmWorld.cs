@@ -22,11 +22,11 @@ public class RealmWorld
     /// <summary>
     /// The number of zones in the world (X).
     /// </summary>
-    public const int ZoneCountX = 50;
+    public const int ZoneCountX = 1500;
     /// <summary>
     /// The number of zones in the world (Z).
     /// </summary>
-    public const int ZoneCountZ = 50;
+    public const int ZoneCountZ = 1500;
 
     #endregion Constants
 

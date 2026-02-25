@@ -9,6 +9,7 @@
 using System.Collections.Concurrent;
 using FluffyByte.Realm.Game.Brains.Assistants;
 using FluffyByte.Realm.Game.Entities.Actors;
+using FluffyByte.Realm.Game.Entities.Actors.Components;
 using FluffyByte.Realm.Game.Entities.Events;
 using FluffyByte.Realm.Game.Entities.Primitives;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
@@ -47,6 +48,9 @@ public class RealmTile
     #region Occupants
 
     public GameObject? Agent { get; private set; }
+    private readonly List<GameObject> _npcs = [];
+    public IReadOnlyList<GameObject> Npcs => _npcs;
+    
     public List<GameObject> Items { get; } = [];
 
     public bool HasAgent => Agent != null;
@@ -54,7 +58,6 @@ public class RealmTile
     #endregion Occupants
 
     #region Components
-
     private readonly Dictionary<Type, TileComponent> _components = [];
 
     private readonly Dictionary<TickType, List<TileComponent>> _tickBuckets = new()
@@ -190,8 +193,14 @@ public class RealmTile
 
     public void OnTileEntered(GameObject enteringObject)
     {
-        if (enteringObject is IUniqueActor)
+        if (enteringObject.GetType() == typeof(UniqueActor))
+        {
             TrySetAgent(enteringObject);
+        }
+        else if (enteringObject.HasComponent<ActorComponent>())
+            _npcs.Add(enteringObject);
+        else
+            Items.Add(enteringObject);
 
         EventManager.Publish(new RealmTileEnterTileEvent
         {
@@ -202,8 +211,16 @@ public class RealmTile
 
     public void OnTileExited(GameObject exitingObject)
     {
-        if (exitingObject is IUniqueActor)
+        if (exitingObject.GetType() == typeof(UniqueActor))
+        {
             ClearAgent(exitingObject);
+        }
+        else if (exitingObject.HasComponent<ActorComponent>())
+            _npcs.Remove(exitingObject);
+        else
+        {
+            Items.Remove(exitingObject);
+        }
 
         EventManager.Publish(new RealmTileExitTileEvent
         {
@@ -276,6 +293,9 @@ public class RealmTile
 
         Agent?.Tick(tickType);
 
+        foreach (var npc in _npcs)
+            npc.Tick(tickType);
+        
         foreach (var item in Items)
             item.Tick(tickType);
 

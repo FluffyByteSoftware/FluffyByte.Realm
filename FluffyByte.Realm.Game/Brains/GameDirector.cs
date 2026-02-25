@@ -143,7 +143,28 @@ public static class GameDirector
 
     public static string Status()
         => $"GameDirector Agents={ActorCount} Hot={HotCount} Warm={WarmCount}";
+    
+    
+    public static RealmTile? GetRandomHotTile(Random random)
+    {
+        var hotTiles = _composer.HotTiles;
+        var warmTiles = _composer.WarmTiles;
+        var total = hotTiles.Count + warmTiles.Count;
+
+        if (total == 0) return null;
+
+        var index = random.Next(0, total);
+
+        return index < hotTiles.Count
+            ? hotTiles.ElementAt(index)
+            : warmTiles.ElementAt(index - hotTiles.Count);
+
+    }
+
+    public static IReadOnlySet<RealmTile> HotTiles => _composer.HotTiles;
+
     #endregion Diagnostics
+
 }
 
 
