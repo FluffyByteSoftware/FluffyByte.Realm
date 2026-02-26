@@ -9,8 +9,7 @@
 using System.Text.Json;
 using FluffyByte.Realm.Game.Entities.Actors;
 using FluffyByte.Realm.Game.Entities.Actors.Players;
-using FluffyByte.Realm.Game.Entities.Complex;
-using FluffyByte.Realm.Game.Entities.Primitives;
+using FluffyByte.Realm.Shared.Misc;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Logger;
@@ -49,10 +48,12 @@ public class PlayerRegistrar
             Intelligence = 10,
             Wisdom = 10,
             Charisma = 10,
-            CurrentTileX = GameDirector.World.GetTile(1,1).GlobalX,
-            CurrentTileZ = GameDirector.World.GetTile(1,1).GlobalZ,
+            CurrentTileX = 0,
+            CurrentTileZ = 0,
+            PreviousTileX = 0,
+            PreviousTileZ = 0,
             ModelType = PrimitiveModelType.Capsule,
-            ComplexModelType = ComplexModelType.DefaultMasculine,
+            ComplexModelType = ComplexModelType.DefaultAndrogynous,
             FootprintRadius = 1,
         };
         
@@ -176,7 +177,9 @@ public class PlayerRegistrar
             HealthRegenPerTick = profile.HealthRegenPerTick,
             HealthRegenMultiplier = profile.HealthRegenMultiplier,
             CurrentTileX = profile.CurrentTileX,
-            CurrentTileZ = profile.CurrentTileZ
+            CurrentTileZ = profile.CurrentTileZ,
+            PreviousTileX = profile.PreviousTileX,
+            PreviousTileZ = profile.PreviousTileZ
         };
     }
     #endregion Template Conversion

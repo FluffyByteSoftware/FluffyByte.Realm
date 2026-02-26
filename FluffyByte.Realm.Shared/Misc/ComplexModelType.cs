@@ -1,4 +1,4 @@
-namespace FluffyByte.Realm.Game.Entities.Complex;
+namespace FluffyByte.Realm.Shared.Misc;
 
 public enum ComplexModelType : byte
 {

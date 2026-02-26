@@ -12,6 +12,7 @@ using FluffyByte.Realm.Networking.Server;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Disk;
+using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Bootstrap.Bootup;
 
@@ -19,6 +20,8 @@ public static class SystemOperator
 {
     public static void InitializeSystem()
     {
+        Log.Info($"[SystemOperator]: Initializing all subroutines.");
+        
         DiskManager.Initialize();
         RealmManager.Initialize();
         PacketManager.Initialize();
@@ -26,6 +29,9 @@ public static class SystemOperator
         ClientManager.Initialize();
         GameDirector.Initialize();
         LoginHandler.Initialize();
+        PlayerCharacterManager.Initialize();
+        
+        Log.Info($"[SystemOperator]: All subroutines initialized.");
     }
 
     public static void StartSystem()

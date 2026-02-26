@@ -7,6 +7,7 @@
  */
 
 using FluffyByte.Realm.Game.Brains.Assistants;
+using FluffyByte.Realm.Game.Entities.Actors;
 using FluffyByte.Realm.Game.Entities.Actors.Components;
 using FluffyByte.Realm.Game.Entities.Actors.Players;
 using FluffyByte.Realm.Game.Entities.Primitives;
@@ -118,6 +119,7 @@ public static class GameDirector
     
     #region Player Registration
 
+    public static ActorTemplate ProfileToTemplate(PlayerProfile profile) => _playerRegistrar.ToTemplate(profile);
     public static void DeletePlayerProfile(Guid id) => _playerRegistrar.DeleteProfile(id);
     
     public static void SavePlayerProfiles() => _playerRegistrar.SaveAll();
@@ -183,7 +185,31 @@ public static class GameDirector
         
         
     }
-    
+
+    public static RealmTile? FindvalidSpawnTile(int globalX, int globalZ, int searchRadius = 5)
+    {
+        var preferred = World.TryGetTile(globalX, globalZ);
+
+        if (preferred is { HasAgent: false })
+            return preferred;
+
+        for (var r = 1; r <= searchRadius; r++)
+        {
+            for(var dx = -r; dx <= r; dx++)
+            for (var dz = -r; dz <= r; dz++)
+            {
+                if (Math.Abs(dx) != r && Math.Abs(dz) != r)
+                    continue; // only check the edge
+
+                var tile = World.TryGetTile(globalX + dx, globalZ + dz);
+                
+                if (tile != null && !tile.HasAgent)
+                    return tile;
+            }
+        }
+
+        return null;
+    }
     #endregion Object Spawn
     
     #region Config Management

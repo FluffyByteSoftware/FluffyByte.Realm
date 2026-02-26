@@ -14,6 +14,9 @@ public class CharacterSlot
 {
     public Guid Id { get; set; } = Guid.Empty;
     public string Name { get; set; } = string.Empty;
+    public PrimitiveModelType ModelType { get; set; }
+    public ComplexModelType ComplexModelType { get; set; } = ComplexModelType.DefaultAndrogynous;
+
     public bool IsEmpty => Id == Guid.Empty;
 
     public static CharacterSlot Empty => new();

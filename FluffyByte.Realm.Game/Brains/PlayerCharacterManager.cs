@@ -6,9 +6,9 @@
  *------------------------------------------------------------
  */
 
-using FluffyByte.Realm.Game.Brains.Helpers;
 using FluffyByte.Realm.Game.Entities.Actors.Players;
 using FluffyByte.Realm.Networking.Accounting;
+using FluffyByte.Realm.Shared.Misc;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Logger;
@@ -23,7 +23,7 @@ public static class PlayerCharacterManager
     private const int MaxNameLength = 18;
 
     #region Lifecycle
-    public static void Initialization()
+    public static void Initialize()
     {
         if (_isInitialized)
             return;
@@ -119,7 +119,6 @@ public static class PlayerCharacterManager
     {
         return account.Characters.Any(g => g == Guid.Empty);
     }
-    
 }
 
 /*

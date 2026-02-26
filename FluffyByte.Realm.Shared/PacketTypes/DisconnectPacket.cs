@@ -20,6 +20,7 @@ namespace FluffyByte.Realm.Shared.PacketTypes
         public DisconnectPacket()
         {
             CreatedAt = DateTime.UtcNow;
+            DisconnectReason = DisconnectReason.RemoteConnectionClose;
         }
         
         public void Serialize(NetDataWriter writer)

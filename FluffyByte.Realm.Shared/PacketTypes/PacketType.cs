@@ -18,11 +18,13 @@ namespace FluffyByte.Realm.Shared.PacketTypes
         AuthenticationServerResponsePacket = 2,
         
         // Character Login Management
-        CharacterList = 10,
-        CharacterCreate = 11,
-        CharacterSelect = 12,
-        CharacterDelete = 13,
-        CharacterReturn = 14,
+        SelectCharacter          = 10,
+        RequestCreateCharacter   = 11,
+        RequestDeleteCharacter   = 12,
+        CharacterList            = 13,
+        CreateCharacterResponse  = 14,
+        DeleteCharacterResponse  = 15,
+        CharacterSelected        = 16,
         
         // Reserved up to 49
         // Movement Bucket Packets

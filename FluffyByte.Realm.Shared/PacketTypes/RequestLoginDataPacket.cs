@@ -19,7 +19,7 @@ namespace FluffyByte.Realm.Shared.PacketTypes
         public RequestLoginDataPacket()
         {
             CreatedAt = DateTime.UtcNow;
-            Nonce = Array.Empty<byte>();
+            Nonce = [];
         }
 
         public void Serialize(NetDataWriter writer)

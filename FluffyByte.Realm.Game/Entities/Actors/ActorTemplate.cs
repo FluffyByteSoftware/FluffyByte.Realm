@@ -15,6 +15,11 @@ public class ActorTemplate : GameObjectTemplate
     public required int MaxHealth { get; init; }
     public required int CurrentTileX { get; set; }
     public required int CurrentTileZ { get; set; }
+    
+    public required int PreviousTileX { get; set; }
+    
+    public required int PreviousTileZ { get; set; }
+    
     public required int Strength { get; init; }
     public required int Dexterity { get; init; }
     public required int Constitution { get; init; }

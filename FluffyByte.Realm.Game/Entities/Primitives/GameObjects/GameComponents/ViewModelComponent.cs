@@ -6,7 +6,7 @@
  *------------------------------------------------------------
  */
 
-using FluffyByte.Realm.Game.Entities.Complex;
+using FluffyByte.Realm.Shared.Misc;
 
 namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 

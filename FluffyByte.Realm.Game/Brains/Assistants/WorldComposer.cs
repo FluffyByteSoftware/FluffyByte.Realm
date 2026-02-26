@@ -6,8 +6,10 @@
  *------------------------------------------------------------
  */
 
+using FluffyByte.Realm.Game.Entities.Actors.Components;
 using FluffyByte.Realm.Game.Entities.Primitives;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
+using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.Interfaces;
 using FluffyByte.Realm.Game.Entities.World;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
@@ -79,9 +81,9 @@ public class WorldComposer(RealmWorld world)
         _newHot.Clear();
         _newWarm.Clear();
 
-        foreach (var (_, actorTile) in actorTiles)
+        foreach (var (actor, actorTile) in actorTiles)
         {
-            CollectTilesForAgent(actorTile, _desiredHot, _desiredWarm);
+            CollectTilesForAgent(actor, actorTile, _desiredHot, _desiredWarm);
         }
 
         // Hot always wins
@@ -155,14 +157,17 @@ public class WorldComposer(RealmWorld world)
         #region Radius Math
 
         private void CollectTilesForAgent(
+            GameObject actor,
             RealmTile actorTile,
             HashSet<RealmTile> desiredHot,
             HashSet<RealmTile> desiredWarm)
         {
             var cx = actorTile.GlobalX;
             var cz = actorTile.GlobalZ;
-            var hotR = GameDirector.Config.HotRadius;
-            var warmR = GameDirector.Config.WarmRadius;
+            var los = actor.GetComponent<LineOfSight>();
+            var hotR = los?.SightRange ?? GameDirector.Config.HotRadius;
+            var warmR = (int)Math.Round(hotR * GameDirector.Config.WarmRadiusMultiplier);
+
             var hotR2 = hotR * hotR;
 
             for (var dx = -warmR; dx <= warmR; dx++)

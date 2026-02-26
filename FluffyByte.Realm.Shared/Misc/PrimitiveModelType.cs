@@ -1,26 +1,27 @@
 /*
- * (NameValidationResult.cs)
+ * (PrimitiveModelTypes.cs)
  *------------------------------------------------------------
- * Created - Wednesday, February 25, 2026@5:50:22 PM
+ * Created - Sunday, February 22, 2026@8:30:30 PM
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
 
-namespace FluffyByte.Realm.Game.Brains.Helpers;
+namespace FluffyByte.Realm.Shared.Misc;
 
-public enum NameValidationResult
+public enum PrimitiveModelType : byte
 {
-    Valid,
-    Empty,
-    TooShort,
-    TooLong,
-    InvalidCharacters,
-    AlreadyTaken
+    Capsule,
+    Box,
+    Sphere,
+    Pyramid,
+    Cone,
+    Quad,
+    CircleQuad
 }
 
 /*
  *------------------------------------------------------------
- * (NameValidationResult.cs)
+ * (PrimitiveModelTypes.cs)
  * See License.txt for licensing information.
  *-----------------------------------------------------------
  */

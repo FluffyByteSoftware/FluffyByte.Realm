@@ -6,8 +6,7 @@
  *------------------------------------------------------------
  */
 
-using FluffyByte.Realm.Game.Entities.Complex;
-using FluffyByte.Realm.Game.Entities.Primitives;
+using FluffyByte.Realm.Networking.Clients;
 
 namespace FluffyByte.Realm.Game.Entities.Actors.Players;
 

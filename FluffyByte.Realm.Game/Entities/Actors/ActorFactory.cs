@@ -7,9 +7,9 @@
  */
 
 using FluffyByte.Realm.Game.Entities.Actors.Components;
-using FluffyByte.Realm.Game.Entities.Complex;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
+using FluffyByte.Realm.Shared.Misc;
 
 namespace FluffyByte.Realm.Game.Entities.Actors;
 
@@ -58,7 +58,7 @@ public static class ActorFactory
 
         var viewComp = new ViewModelComponent(template.ModelType)
         {
-            RealModelType = ComplexModelType.DefaultMasculine
+            RealModelType = ComplexModelType.DefaultAndrogynous
         };
 
         actor.AddComponent(viewComp);

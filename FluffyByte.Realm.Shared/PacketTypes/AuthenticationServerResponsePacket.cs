@@ -18,6 +18,7 @@ namespace FluffyByte.Realm.Shared.PacketTypes
 
         public AuthenticationServerResponsePacket()
         {
+            Success = false;
             CreatedAt = DateTime.UtcNow;
         }
 

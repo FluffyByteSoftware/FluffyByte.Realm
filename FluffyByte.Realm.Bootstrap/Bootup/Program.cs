@@ -1,9 +1,8 @@
 ﻿using FluffyByte.Realm.Game.Brains;
 using FluffyByte.Realm.Game.Entities.Actors.Players;
-using FluffyByte.Realm.Game.Entities.Complex;
-using FluffyByte.Realm.Game.Entities.Primitives;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Shared.CryptoTool;
+using FluffyByte.Realm.Shared.Misc;
 using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Bootstrap.Bootup;
@@ -45,6 +44,8 @@ public static class Program
             Charisma = 10,
             CurrentTileX = 0,
             CurrentTileZ = 0,
+            PreviousTileX = 0,
+            PreviousTileZ = 0,
             ModelType = PrimitiveModelType.Capsule,
             ComplexModelType = ComplexModelType.DefaultMasculine,
             FootprintRadius = 1
