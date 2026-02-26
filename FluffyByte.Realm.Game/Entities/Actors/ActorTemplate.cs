@@ -5,6 +5,8 @@
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
+
+using FluffyByte.Realm.Game.Entities.Actors.Components;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
 namespace FluffyByte.Realm.Game.Entities.Actors;
@@ -19,6 +21,9 @@ public class ActorTemplate : GameObjectTemplate
     public required int PreviousTileX { get; set; }
     
     public required int PreviousTileZ { get; set; }
+
+    public required int LineOfSight { get; init; }
+    public required int AudibleRange { get; init; }
     
     public required int Strength { get; init; }
     public required int Dexterity { get; init; }

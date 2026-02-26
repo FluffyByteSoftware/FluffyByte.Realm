@@ -212,8 +212,18 @@ public static class GameDirector
         {
             if (tile.IsGroundBlocked)
             {
-                Log.Warn($"[GameDirector]: Cannot spawn {objectToSpawn.Name} on tile " +
-                         $"{tile.GlobalX},{tile.GlobalZ} because it already has an agent.");
+                if (tile.HasAgent)
+                {
+                    Log.Warn($"[GameDirector]: Cannot spawn {objectToSpawn.Name} on tile (" +
+                             $"{tile.GlobalX},{tile.GlobalZ}) because it already has an agent.");
+                    
+                }
+                else
+                {
+                    Log.Warn($"[GameDirector]: Cannot spawn {objectToSpawn.Name} on tile " +
+                             $"{tile.GlobalX},{tile.GlobalZ} because its ground is obstructed.");
+                }
+
                 return;
             }
         }
@@ -243,7 +253,7 @@ public static class GameDirector
 
                 var tile = WakeBeforeSpawn(globalX + dx, globalZ + dz);
 
-                if (tile != null && !tile.IsGroundBlocked)
+                if (tile is { IsGroundBlocked: false })
                     return tile;
             }
         }

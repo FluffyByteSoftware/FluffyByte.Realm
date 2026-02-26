@@ -65,6 +65,13 @@ public static class ActorFactory
 
         var collision = new CollisionShapeComponent() { FootprintRadius = template.FootprintRadius };
         actor.AddComponent(collision);
+
+        var los = new LineOfSight() 
+        { 
+            SightRange = template.LineOfSight, 
+            AudibleRange = template.AudibleRange 
+        };
+        actor.AddComponent(los);
         
         var actorStats = new ActorStats
         {

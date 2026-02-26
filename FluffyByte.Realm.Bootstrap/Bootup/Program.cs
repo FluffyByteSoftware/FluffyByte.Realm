@@ -28,6 +28,8 @@ public static class Program
     {
         var selirisProfile = new PlayerProfile()
         {
+            LineOfSight = 350,
+            AudibleRange = 200,
             Id = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow,
             Name = "seliris",

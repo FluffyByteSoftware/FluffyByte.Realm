@@ -34,6 +34,8 @@ public class PlayerRegistrar
     {
         var profile = new PlayerProfile
         {
+            LineOfSight = 350,
+            AudibleRange = 200,
             Id = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow,
             Name = name,
@@ -160,6 +162,8 @@ public class PlayerRegistrar
     {
         return new ActorTemplate()
         {
+            LineOfSight = profile.LineOfSight,
+            AudibleRange = profile.AudibleRange,
             Id = profile.Id,
             Name = profile.Name,
             Strength = profile.Strength,
