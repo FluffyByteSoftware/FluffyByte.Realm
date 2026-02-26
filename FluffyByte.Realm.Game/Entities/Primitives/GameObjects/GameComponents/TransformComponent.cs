@@ -6,7 +6,7 @@
  *------------------------------------------------------------
  */
 
-using System.Security.Cryptography.X509Certificates;
+using FluffyByte.Realm.Game.Brains;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
 namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
@@ -21,9 +21,20 @@ public class TransformComponent : GameObjectComponent
     
     #region Spatial State
 
+    /// <summary>
+    /// The tile the object is currently on
+    /// </summary>
     public RealmTile? Tile { get; set; }
+    
+    /// <summary>
+    /// Rotation in radians of the Y axis (Yaw)
+    /// </summary>
     public float Rotation { get; set; } = 0f;
-    public float Scale { get; set; } = 1f;
+    
+    /// <summary>
+    /// Scale of the object, always in whole numbers.
+    /// </summary>
+    public int Scale { get; set; } = 1;
 
     #endregion Spatial State
     
@@ -36,7 +47,7 @@ public class TransformComponent : GameObjectComponent
     
     #region Constructor
 
-    public TransformComponent(RealmTile? tile = null, float rotation = 0f, float scale = 1f)
+    public TransformComponent(RealmTile? tile = null, float rotation = 0f, int scale = 1)
     {
         Tile = tile;
         Rotation = rotation;
@@ -62,6 +73,14 @@ public class TransformComponent : GameObjectComponent
     public override void Tick() {}
     #endregion Tick
     
+    #region Movement
+
+    public Task<RealmTile?> RequestMove(int globalX, int globalZ)
+    {
+        return GameDirector.RequestMove(Owner, globalX, globalZ);
+    }
+    
+    #endregion Movement
     #region Diagnostics
 
     public override string ToString()

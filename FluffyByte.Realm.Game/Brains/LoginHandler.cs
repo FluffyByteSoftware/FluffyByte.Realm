@@ -8,6 +8,7 @@
 
 using FluffyByte.Realm.Game.Entities.Actors;
 using FluffyByte.Realm.Game.Entities.Actors.Players;
+using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Networking.Clients;
 using FluffyByte.Realm.Networking.Events;
@@ -235,27 +236,20 @@ public static class LoginHandler
 
     #region Spawn Player
 
-    private static void SpawnPlayer(RealmClient client, PlayerProfile profile)
+    private static async Task SpawnPlayer(RealmClient client, PlayerProfile profile)
     {
         var template = GameDirector.ProfileToTemplate(profile);
         var actor = ActorFactory.CreatePlayerActor(template);
+        
+        var spawnTile = await GameDirector.RequestSpawn(
+            actor, profile.CurrentTileX, profile.CurrentTileZ);
 
-        var spawnTile = GameDirector.World.GetTile(profile.CurrentTileX, profile.CurrentTileZ);
-
-        GameDirector.SpawnGameObject(actor, spawnTile);
-
-        Log.Info($"[LoginHandler]: Spawned '{profile.Name}' for {client.Name} " +
-                 $"at ({profile.CurrentTileX},{profile.CurrentTileZ}).");
-
-        var spawnPacket = new CharacterSelectedPacket
+        if (spawnTile == null)
         {
-            Success = true,
-            NetworkId = actor.NetworkId,
-            GlobalX = spawnTile.GlobalX,
-            GlobalZ = spawnTile.GlobalZ
-        };
+            Log.Warn($"[LoginHandler]: No valid spawn tile for '{profile.Name}'. Moving to 0,0.");
 
-        client.SendPacket(PacketType.CharacterSelected, spawnPacket);
+            spawnTile = await GameDirector.RequestSpawn(actor, 0, 0);
+        }
     }
 
     #endregion Spawn Player

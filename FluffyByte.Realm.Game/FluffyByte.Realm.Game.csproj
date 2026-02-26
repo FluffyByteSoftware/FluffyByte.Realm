@@ -21,7 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Brains\Helpers\" />
       <Folder Include="Clocks\" />
       <Folder Include="Entities\Actors\Agents\" />
       <Folder Include="Entities\Complex\" />

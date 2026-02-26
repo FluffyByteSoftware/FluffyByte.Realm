@@ -33,9 +33,17 @@ public class RealmTile
     public RealmZone? Zone { get; set; }
     public RealmTileLoadState LoadState { get; private set; } = RealmTileLoadState.Cold;
     public DateTime? ColdSince { get; private set; }
-
+    
     #endregion Identity
 
+    #region Passability
+    public TilePassability Passability { get; set; } = TilePassability.Passable;
+
+    public bool IsPassable => Passability == TilePassability.Passable;
+    public bool IsGroundBlocked => Passability != TilePassability.Passable || HasAgent;
+    public bool IsFlyingBlocked => Passability.HasFlag(TilePassability.NotPassable);
+    #endregion Passability
+    
     #region Neighbors
 
     public RealmTile[] Neighbors { get; private set; } = [];
@@ -156,7 +164,7 @@ public class RealmTile
 
     public bool TrySetAgent(GameObject agent)
     {
-        if (HasAgent)
+        if (IsGroundBlocked)
             return false;
 
         Agent = agent;
@@ -309,7 +317,8 @@ public class RealmTile
     public int ItemCount      => Items.Count;
 
     public override string ToString()
-        => $"RealmTile ({X},{Z}) Global({GlobalX},{GlobalZ}) State={LoadState} Agent={Agent?.Name ?? "none"} Items={Items.Count}";
+        => $"RealmTile ({X},{Z}) Global({GlobalX},{GlobalZ}) State={LoadState} " +
+           $"Agent={Agent?.Name ?? "none"} Items={Items.Count}";
 
     #endregion Diagnostics
 }
