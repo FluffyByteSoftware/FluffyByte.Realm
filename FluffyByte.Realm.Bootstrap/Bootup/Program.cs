@@ -18,7 +18,7 @@ public static class Program
 
         //StressTest();
         
-        CreatePlayerSeliris();
+        //CreatePlayerSeliris();
         
         Console.ReadLine();
 

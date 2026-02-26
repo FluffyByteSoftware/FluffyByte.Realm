@@ -5,147 +5,112 @@
  * Created by - Jacob Chacko
  *------------------------------------------------------------
  */
-using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Networking.Accounting;
-
 public class RealmAccount
 {
-    private const int MaxCharacterSlots = 3;
-    
-    public string Username { get; private set; }
-    public string FilePath { get; private set; }
-    public byte[] PasswordHash { get; private set; }
-    public Guid[] Characters { get; private set; }
+    public const int MaxCharacterSlots = 4;
+
+    public string Username { get; set; } = string.Empty;
+    public byte[] PasswordHash { get; set; } = [];
+    public Guid[] Characters { get; set; } = new Guid[MaxCharacterSlots];
+
+    [JsonIgnore]
+    public string FilePath { get; set; } = string.Empty;
 
     private const string AccountsFolder = @"E:\FluffyByte\Builds\0.0.1\ServerData\Accounts";
-    
+
+    public RealmAccount() { }
+
     public RealmAccount(string username, byte[] passwordHash)
     {
+        if (username.Length is < 3 or > 20)
+        {
+            throw new ArgumentException("Username must be between 3 and 20 characters.");
+        }
+        
         Username = username;
-        FilePath = Path.Combine(AccountsFolder, $"{username}.account");
         PasswordHash = passwordHash;
-        Characters = new Guid[MaxCharacterSlots];
+        FilePath = Path.Combine(AccountsFolder, $"{username}.account");
     }
 
-    private RealmAccount()
-    {
-        Username = string.Empty;
-        FilePath = string.Empty;
-        PasswordHash = [];
-        Characters = new Guid[MaxCharacterSlots];
-    }
-
-    /// <summary>
-    /// Load a RealmAccount from a file
-    ///
-    /// Expected format:
-    /// #USERNAME=value
-    /// #HASHPASSWORD=hex
-    /// #CHARACTER1=guid (or empty)
-    /// #CHARACTER2=guid (or empty)
-    /// #CHARACTER3=guid (or empty)
-    /// </summary>
-    /// <param name="filePath">Path to the file to load</param>
-    /// <returns>A constructed realm account if found, from the filepath specified.</returns>
     public static RealmAccount? Load(string filePath)
     {
-        var read = new RequestFileReadEvent()
-        {
-            FilePath = filePath
-        };
-        
+        if (!File.Exists(filePath))
+            return null;
+
+        var read = new RequestFileReadTextEvent { FilePath = filePath };
         EventManager.Publish(read);
-        
-        var data = read.GetData();
-        
-        if (data == null) return null;
-        
+
+        var json = read.GetText();
+        if (json == null)
+        {
+            Log.Warn($"[RealmAccount]: Failed to read {filePath}");
+            return null;
+        }
+
         try
         {
-            var content = Encoding.UTF8.GetString(data);
-            var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries
-                                            | StringSplitOptions.TrimEntries);
+            var account = JsonSerializer.Deserialize<RealmAccount>(json);
+            if (account == null) return null;
 
-            var account = new RealmAccount
-            {
-                FilePath = filePath
-            };
-
-            foreach (var line in lines)
-            {
-                if (!line.StartsWith('#') || !line.Contains('='))
-                    continue;
-
-                var key = line[1..line.IndexOf('=')];
-                var value = line[(line.IndexOf('=') + 1)..];
-
-                // If you expand beyond character 3, you will need to add additional reserves here.
-                switch (key)
-                {
-                    case "USERNAME":
-                        account.Username = value;
-                        break;
-                    case "HASHPASSWORD":
-                        account.PasswordHash = Convert.FromHexString(value);
-                        break;
-                    case "CHARACTER1":
-                        account.Characters[0] = ParseGuid(value);
-                        break;
-                    case "CHARACTER2":
-                        account.Characters[1] = ParseGuid(value);
-                        break;
-                    case "CHARACTER3":
-                        account.Characters[2] = ParseGuid(value);
-                        break;
-                }
-            }
+            account.FilePath = filePath;
 
             if (string.IsNullOrEmpty(account.Username) || account.PasswordHash.Length == 0)
             {
-                Log.Warn($"[RealmAccount]: Failed to load account from {filePath}. Missing required fields.");
+                Log.Warn($"[RealmAccount]: Missing required fields in {filePath}");
                 return null;
+            }
+
+            // Handle old 3-slot files upgrading to 4
+            if (account.Characters.Length < MaxCharacterSlots)
+            {
+                var expanded = new Guid[MaxCharacterSlots];
+                Array.Copy(account.Characters, expanded, account.Characters.Length);
+                account.Characters = expanded;
             }
 
             return account;
         }
         catch (Exception ex)
         {
-            Log.Error($"Error loading account: {filePath}", ex);
+            Log.Error($"[RealmAccount]: Error loading {filePath}", ex);
             return null;
         }
     }
 
     public void Save()
     {
-        var sb = new StringBuilder();
-        sb.AppendLine($"#USERNAME={Username}");
-        sb.AppendLine($"#HASHPASSWORD={Convert.ToHexString(PasswordHash)}");
+        var path = string.IsNullOrEmpty(FilePath)
+            ? Path.Combine(AccountsFolder, $"{Username}.account")
+            : FilePath;
 
-        for (var i = 0; i < Characters.Length; i++)
+        var json = JsonSerializer.Serialize(this, new JsonSerializerOptions
         {
-            sb.AppendLine($"#CHARACTER{i + 1}={GuidToString(Characters[i])}");
-        }
+            WriteIndented = true
+        });
 
-        var write = new RequestFileWriteTextEvent()
+        var write = new RequestFileWriteTextEvent
         {
-            FilePath = Path.Combine(AccountsFolder, $"{Username}.account"),
-            Text = sb.ToString()
+            FilePath = path,
+            Text = json
         };
-        
+
         EventManager.Publish(write);
     }
 
-    public void AddCharacter(Guid characterId)
+    public bool AddCharacter(Guid characterId)
     {
         if (characterId == Guid.Empty)
-            return;
+            return false;
 
         if (Characters.Contains(characterId))
-            return;
+            return false;
 
         for (var i = 0; i < Characters.Length; i++)
         {
@@ -153,11 +118,12 @@ public class RealmAccount
             {
                 Characters[i] = characterId;
                 Save();
-                return;
+                return true;
             }
         }
 
-        Log.Warn($"[RealmAccount]: Cannot add character {characterId} to {Username}");
+        Log.Warn($"[RealmAccount]: No empty slots for {Username}");
+        return false;
     }
 
     public void RemoveCharacter(Guid characterId)
@@ -170,21 +136,10 @@ public class RealmAccount
             if (Characters[i] == characterId)
             {
                 Characters[i] = Guid.Empty;
+                Save();
                 return;
             }
         }
-        
-        Log.Warn($"[RealmAccount]: Cannot remove character {characterId} from {Username}");
-    }
-    
-    private static Guid ParseGuid(string value)
-    {
-        return Guid.TryParse(value, out var guid) ? guid : Guid.Empty;
-    }
-
-    private static string GuidToString(Guid guid)
-    {
-        return guid == Guid.Empty ? "" : guid.ToString();
     }
 }
 

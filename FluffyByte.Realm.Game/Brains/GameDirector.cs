@@ -118,6 +118,8 @@ public static class GameDirector
     
     #region Player Registration
 
+    public static void DeletePlayerProfile(Guid id) => _playerRegistrar.DeleteProfile(id);
+    
     public static void SavePlayerProfiles() => _playerRegistrar.SaveAll();
     
     public static void CreatePlayerProfile(string name) => _playerRegistrar.CreateProfile(name);

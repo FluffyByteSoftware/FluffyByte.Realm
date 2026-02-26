@@ -25,7 +25,7 @@ public static class SystemOperator
         AccountManager.Initialize();
         ClientManager.Initialize();
         GameDirector.Initialize();
-        
+        LoginHandler.Initialize();
     }
 
     public static void StartSystem()
