@@ -8,6 +8,7 @@
 
 using System.Collections.Concurrent;
 using System.Net;
+using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Shared.PacketTypes;
 using FluffyByte.Realm.Tools.Logger;
 using LiteNetLib;
@@ -29,6 +30,8 @@ public class RealmClient
     public DateTime LastResponseTime { get; private set; } = DateTime.UtcNow;
     public TimeSpan Uptime => DateTime.UtcNow - LoginTime;
     public TimeSpan IdleTime => DateTime.UtcNow - LastResponseTime;
+
+    public RealmAccount? Account { get; private set; } 
 
     private bool _disconnecting;
 
@@ -99,6 +102,11 @@ public class RealmClient
         writer.Put((byte)type);
         packet.Serialize(writer);
         Peer.Send(writer, deliveryMethod);
+    }
+
+    public void SetAccount(RealmAccount account)
+    {
+        Account = account;
     }
 
     public void Disconnect()

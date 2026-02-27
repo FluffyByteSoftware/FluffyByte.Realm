@@ -7,7 +7,7 @@
  */
 
 namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
-
+[Flags]
 public enum TilePassability : byte
 {
     Passable    = 0,

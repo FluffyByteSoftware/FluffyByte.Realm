@@ -12,7 +12,7 @@ public enum UniqueObjectType
 {
     None = 0,
     Player = 1,
-    EliteNPC = 2,
+    EliteNpc = 2,
     WorldBoss = 3
 }
 

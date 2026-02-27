@@ -273,6 +273,9 @@ public static class Log
     /// the compiler.</param>
     /// <param name="lineNumber">The line number in the source file where the log entry was triggered. Automatically
     /// provided by the compiler.</param>
+    [ThreadStatic]
+    private static bool _isWriting;
+
     private static void WriteLog(
         LogLevel level,
         string message,
@@ -281,30 +284,42 @@ public static class Log
         string memberName,
         int lineNumber)
     {
-        var timestamp = DateTime.Now.ToString("yyyy-MM-dd@HH:mm:ss");
-        var fileName = Path.GetFileName(filePath);
-        var location = $"{fileName} @ {memberName}: {lineNumber}";
+        if (_isWriting)
+            return;
 
-        var logBuilder = new StringBuilder();
+        _isWriting = true;
 
-        logBuilder.Append($"[{timestamp}] - [{level}] - ");
-
-        if (!string.IsNullOrEmpty(message))
-            logBuilder.Append(message);
-
-        if (ex != null)
+        try
         {
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd@HH:mm:ss");
+            var fileName = Path.GetFileName(filePath);
+            var location = $"{fileName} @ {memberName}: {lineNumber}";
+
+            var logBuilder = new StringBuilder();
+
+            logBuilder.Append($"[{timestamp}] - [{level}] - ");
+
             if (!string.IsNullOrEmpty(message))
-                logBuilder.Append(" - ");
+                logBuilder.Append(message);
 
-            var exLog = new ExceptionLog(ex);
-            logBuilder.Append(exLog);
+            if (ex != null)
+            {
+                if (!string.IsNullOrEmpty(message))
+                    logBuilder.Append(" - ");
+
+                var exLog = new ExceptionLog(ex);
+                logBuilder.Append(exLog);
+            }
+
+            logBuilder.Append($" - [{location}]");
+
+            Console.WriteLine(logBuilder.ToString());
+            EventManager.Publish(new LogEvents(logBuilder.ToString()));
         }
-
-        logBuilder.Append($" - [{location}]");
-        
-        Console.WriteLine(logBuilder.ToString());
-        EventManager.Publish(new LogEvents(logBuilder.ToString()));
+        finally
+        {
+            _isWriting = false;
+        }
     }
 }
 

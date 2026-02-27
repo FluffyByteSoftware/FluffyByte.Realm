@@ -25,6 +25,14 @@ namespace FluffyByte.Realm.Shared.PacketTypes
         CreateCharacterResponse  = 14,
         DeleteCharacterResponse  = 15,
         CharacterSelected        = 16,
+
+        // World State Bucket (30-49 range, after character management)
+        ServerSpawnActor            = 30,
+        ServerDespawnActor          = 31,
+        ServerActorMoved            = 32,
+        ServerActorDied             = 33,
+        ServerActorHealthChanged    = 34,
+        ServerActorRotated          = 35,
         
         // Reserved up to 49
         // Movement Bucket Packets

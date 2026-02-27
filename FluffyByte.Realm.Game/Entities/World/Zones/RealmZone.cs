@@ -59,6 +59,8 @@ public class RealmZone(string name, int worldOffsetX, int worldOffsetZ)
         for (var z = 0; z < Height; z++)
             Tiles[x, z] = new RealmTile(x, z, WorldOffsetX + x, WorldOffsetZ + z)
             {
+                X = x,
+                Z = z,
                 Zone = this
             };
 

@@ -13,9 +13,9 @@ namespace FluffyByte.Realm.Game.Brains.Helpers;
 
 public class MoveRequest
 {
-    public GameObject GameObject { get; init; }
-    public int TargetGlobalX { get; init; }
-    public int TargetGlobalZ { get; init; }
+    public required GameObject GameObject { get; init; }
+    public required int TargetGlobalX { get; init; }
+    public required int TargetGlobalZ { get; init; }
     public TaskCompletionSource<RealmTile?> Completion { get; } = new();
 }
 

@@ -110,6 +110,8 @@ public static class NewClientManager
             Success = true
         };
 
+        client.SetAccount(account);
+
         client.SendPacket(PacketType.AuthenticationServerResponsePacket, respond);
 
         EventManager.Publish(new OnAuthenticationSuccessEvent()

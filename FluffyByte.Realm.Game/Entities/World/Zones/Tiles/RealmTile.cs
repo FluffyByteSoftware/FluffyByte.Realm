@@ -8,7 +8,6 @@
 
 using System.Collections.Concurrent;
 using FluffyByte.Realm.Game.Brains.Assistants;
-using FluffyByte.Realm.Game.Entities.Actors.Components;
 using FluffyByte.Realm.Game.Entities.Events;
 using FluffyByte.Realm.Game.Entities.Primitives;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
@@ -21,15 +20,15 @@ namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 /// A RealmTile represents the most granular level of space within the game world.
 /// It should translate to a 1x1 Godot unit, square.
 /// </summary>
-public class RealmTile
+public class RealmTile(int x, int z, int globalX, int globalZ)
 {
     #region Identity
 
-    public int X { get; }
-    public int Z { get; }
-    public int GlobalX { get; }
-    public int GlobalZ { get; }
-    
+    public int X { get; set; } = x;
+    public int Z { get; set; } = z;
+    public int GlobalX { get; } = globalX;
+    public int GlobalZ { get; } = globalZ;
+
     public RealmZone? Zone { get; set; }
     public RealmTileLoadState LoadState { get; private set; } = RealmTileLoadState.Cold;
     public DateTime? ColdSince { get; private set; }
@@ -79,16 +78,7 @@ public class RealmTile
     private readonly ConcurrentQueue<ITileCommand> _commandQueue = [];
 
     #endregion Command Queue
-
     #region Constructor
-
-    public RealmTile(int x, int z, int globalX, int globalZ)
-    {
-        X       = x;
-        Z       = z;
-        GlobalX = globalX;
-        GlobalZ = globalZ;
-    }
 
     #endregion Constructor
 

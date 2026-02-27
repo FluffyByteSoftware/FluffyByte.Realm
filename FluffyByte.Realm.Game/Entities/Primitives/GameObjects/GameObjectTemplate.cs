@@ -12,14 +12,14 @@ namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 
 public class GameObjectTemplate
 {
-    public required string Name { get; init; } = "Unnamed";
+    public required string Name { get; set; } = "Unnamed";
     
-    public required Guid Id { get; init; } = Guid.NewGuid();
+    public required Guid Id { get; set; } = Guid.NewGuid();
     
-    public List<string> Tags { get; init; } = [];
-    public required PrimitiveModelType ModelType { get; init; } = PrimitiveModelType.Capsule;
-    public required ComplexModelType? ComplexModelType { get; init; }
-    public required int FootprintRadius { get; init; } = 1;
+    public List<string> Tags { get; set; } = [];
+    public required PrimitiveModelType ModelType { get; set; } = PrimitiveModelType.Capsule;
+    public required ComplexModelType? ComplexModelType { get; set; }
+    public required int FootprintRadius { get; set; } = 1;
 }
 
 /*

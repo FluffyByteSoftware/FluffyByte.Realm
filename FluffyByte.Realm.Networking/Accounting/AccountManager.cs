@@ -121,7 +121,6 @@ public static class AccountManager
     #endregion Account Loading
     
     #region Lookups
-
     public static RealmAccount? GetAccountByUsername(string username)
     {
         return Accounts.FirstOrDefault(a =>

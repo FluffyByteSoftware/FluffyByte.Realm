@@ -21,6 +21,8 @@ public class PlayerRegistrar
     private readonly Dictionary<Guid, PlayerProfile> _profiles = [];
     private readonly string _savePath;
 
+    private readonly static JsonSerializerOptions _options = new() { WriteIndented = true };
+
     public PlayerRegistrar()
     {
         _savePath = GameDirector.Config.CharacterDataPath;
@@ -29,40 +31,10 @@ public class PlayerRegistrar
     }
     
     #region Create/Delete
-
-    public PlayerProfile CreateProfile(string name)
+    public void Register(PlayerProfile profile)
     {
-        var profile = new PlayerProfile
-        {
-            LineOfSight = 350,
-            AudibleRange = 200,
-            Id = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
-            Name = name,
-            CurrentHealth = 100,
-            MaxHealth = 100,
-            HealthRegenPerTick = 1,
-            HealthRegenIntervalSeconds = 5,
-            HealthRegenMultiplier = 1,
-            Strength = 10,
-            Dexterity = 10,
-            Constitution = 10,
-            Intelligence = 10,
-            Wisdom = 10,
-            Charisma = 10,
-            CurrentTileX = 0,
-            CurrentTileZ = 0,
-            PreviousTileX = 0,
-            PreviousTileZ = 0,
-            ModelType = PrimitiveModelType.Capsule,
-            ComplexModelType = ComplexModelType.DefaultAndrogynous,
-            FootprintRadius = 1,
-        };
-        
-        _profiles[Guid.NewGuid()] = profile;
+        _profiles[profile.Id] = profile;
         Save(profile);
-
-        return profile;
     }
 
     public void DeleteProfile(Guid id)
@@ -118,10 +90,8 @@ public class PlayerRegistrar
     public void Save(PlayerProfile profile)
     {
         var path = GetFilePath(profile.Name);
-        var json = JsonSerializer.Serialize(profile, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
+        
+        string json = JsonSerializer.Serialize(profile, _options);
 
         var requestWrite = new RequestFileWriteTextEvent()
         {
@@ -156,37 +126,6 @@ public class PlayerRegistrar
     public bool ProfileExists(string name) => File.Exists(GetFilePath(name));
     #endregion Query
     
-    #region Template Conversion
-
-    public ActorTemplate ToTemplate(PlayerProfile profile)
-    {
-        return new ActorTemplate()
-        {
-            LineOfSight = profile.LineOfSight,
-            AudibleRange = profile.AudibleRange,
-            Id = profile.Id,
-            Name = profile.Name,
-            Strength = profile.Strength,
-            Dexterity = profile.Dexterity,
-            Constitution = profile.Constitution,
-            Intelligence = profile.Intelligence,
-            Wisdom = profile.Wisdom,
-            Charisma = profile.Charisma,
-            CurrentHealth = profile.CurrentHealth,
-            MaxHealth = profile.MaxHealth,
-            ModelType = profile.ModelType,
-            ComplexModelType = profile.ComplexModelType,
-            FootprintRadius = 1,
-            HealthRegenIntervalSeconds = profile.HealthRegenIntervalSeconds,
-            HealthRegenPerTick = profile.HealthRegenPerTick,
-            HealthRegenMultiplier = profile.HealthRegenMultiplier,
-            CurrentTileX = profile.CurrentTileX,
-            CurrentTileZ = profile.CurrentTileZ,
-            PreviousTileX = profile.PreviousTileX,
-            PreviousTileZ = profile.PreviousTileZ
-        };
-    }
-    #endregion Template Conversion
     
     #region Helpers
 

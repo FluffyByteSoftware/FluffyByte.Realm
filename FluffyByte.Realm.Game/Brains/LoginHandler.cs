@@ -8,7 +8,7 @@
 
 using FluffyByte.Realm.Game.Entities.Actors;
 using FluffyByte.Realm.Game.Entities.Actors.Players;
-using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
+using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Networking.Clients;
 using FluffyByte.Realm.Networking.Events;
@@ -77,7 +77,7 @@ public static class LoginHandler
         var packet = new CharacterListPacket
         {
             SlotCount = account.Characters.Length,
-            Slots = account.Characters.Select(guid =>
+            Slots = [.. account.Characters.Select(guid =>
             {
                 if (guid == Guid.Empty)
                     return CharacterSlot.Empty;
@@ -87,7 +87,7 @@ public static class LoginHandler
                 return profile == null
                     ? CharacterSlot.Empty
                     : new CharacterSlot { Id = profile.Id, Name = profile.Name };
-            }).ToArray()
+            })]
         };
 
         client.SendPacket(PacketType.CharacterList, packet);
@@ -172,7 +172,7 @@ public static class LoginHandler
             return;
         }
 
-        SpawnPlayer(client, profile);
+        SpawnPlayer(client, profile).Wait();
     }
 
     #endregion Select Character
@@ -183,9 +183,36 @@ public static class LoginHandler
         RealmAccount account, 
         RequestCreateCharacterPacket packet)
     {
-        var profile = PlayerCharacterManager.CreateCharacter(packet.Name, account);
+        var profile = new PlayerProfile
+        {
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTime.UtcNow,
+            Name = packet.Name,
+            CurrentHealth = 100,
+            MaxHealth = 100,
+            CurrentTileX = 0,
+            CurrentTileZ = 0,
+            PreviousTileX = 0,
+            PreviousTileZ = 0,
+            LineOfSight = 350,
+            AudibleRange = 200,
+            Strength = 10,
+            Dexterity = 10,
+            Constitution = 10,
+            Intelligence = 10,
+            Wisdom = 10,
+            Charisma = 10,
+            HealthRegenPerTick = 1,
+            HealthRegenIntervalSeconds = 5,
+            HealthRegenMultiplier = 1,
+            FootprintRadius = 1,
+            ModelType = PrimitiveModelType.Capsule,
+            ComplexModelType = ComplexModelType.DefaultAndrogynous
+        };
 
-        if (profile == null)
+        var result = PlayerCharacterManager.CreateCharacter(profile, account);
+
+        if (result == null)
         {
             var validation = PlayerCharacterManager.ValidateName(packet.Name);
 
@@ -207,7 +234,6 @@ public static class LoginHandler
 
         client.SendPacket(PacketType.CreateCharacterResponse, successResponse);
 
-        // Resend updated character list
         SendCharacterList(client, account);
     }
 
@@ -238,18 +264,59 @@ public static class LoginHandler
 
     private static async Task SpawnPlayer(RealmClient client, PlayerProfile profile)
     {
-        var template = GameDirector.ProfileToTemplate(profile);
-        var actor = ActorFactory.CreatePlayerActor(template);
-        
-        var spawnTile = await GameDirector.RequestSpawn(
+        var actor = ActorFactory.CreatePlayerActor(profile);
+
+        if(client.Account == null)
+        {
+            Log.Error($"[LoginHandler]: Failed to SpawnPlayer as the account for the client isn't set.");
+            return;
+        }
+
+        var playerComp = new PlayerComponent()
+        {
+            Client = client,
+            AccountName = client.Account.Username,
+            Id = profile.Id,
+            Name = profile.Name,
+            CreatedAt = profile.CreatedAt,
+            ModelType = profile.ModelType,
+            FootprintRadius = profile.FootprintRadius,
+            LineOfSight = profile.LineOfSight,
+            AudibleRange = profile.AudibleRange,
+            CurrentTileX = profile.CurrentTileX,
+            CurrentTileZ = profile.CurrentTileZ,
+            CurrentHealth = profile.CurrentHealth,
+            MaxHealth = profile.MaxHealth,
+            Strength = profile.Strength,
+            Dexterity = profile.Dexterity,
+            Constitution = profile.Constitution,
+            Intelligence = profile.Intelligence,
+            Wisdom = profile.Wisdom,
+            Charisma = profile.Charisma,
+            HealthRegenPerTick = profile.HealthRegenPerTick,
+            HealthRegenIntervalSeconds = profile.HealthRegenIntervalSeconds,
+            HealthRegenMultiplier = profile.HealthRegenMultiplier
+        };
+
+        actor.AddComponent(playerComp);
+
+        RealmTile? spawnTile = await GameDirector.RequestSpawn(
             actor, profile.CurrentTileX, profile.CurrentTileZ);
 
         if (spawnTile == null)
         {
             Log.Warn($"[LoginHandler]: No valid spawn tile for '{profile.Name}'. Moving to 0,0.");
-
+            
             spawnTile = await GameDirector.RequestSpawn(actor, 0, 0);
         }
+
+        if (spawnTile == null)
+        {
+            Log.Error($"[LoginHandler]: No valid spawn tile for '{profile.Name}' at 0,0. Disconnecting.");
+            client.Disconnect();
+            return;
+        }
+
     }
 
     #endregion Spawn Player

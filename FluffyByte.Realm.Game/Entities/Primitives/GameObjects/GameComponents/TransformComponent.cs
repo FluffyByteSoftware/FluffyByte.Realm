@@ -11,58 +11,44 @@ using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
 namespace FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 
-public class TransformComponent : GameObjectComponent
+public class TransformComponent(RealmTile? tile = null, float rotation = 0f, int scale = 1) : GameObjectComponent
 {
     #region Tick Type
 
     public override TickType TickType => TickType.Fast;
 
     #endregion Tick Type
-    
+
     #region Spatial State
 
     /// <summary>
     /// The tile the object is currently on
     /// </summary>
-    public RealmTile? Tile { get; set; }
-    
+    public RealmTile? Tile { get; set; } = tile;
+
     /// <summary>
     /// Rotation in radians of the Y axis (Yaw)
     /// </summary>
-    public float Rotation { get; set; } = 0f;
-    
+    public float Rotation { get; set; } = rotation;
+
     /// <summary>
     /// Scale of the object, always in whole numbers.
     /// </summary>
-    public int Scale { get; set; } = 1;
+    public int Scale { get; set; } = scale;
 
     #endregion Spatial State
-    
+
     #region Convenience
 
     public int GlobalX => Tile?.GlobalX ?? 0;
     public int GlobalZ => Tile?.GlobalZ ?? 0;
 
     #endregion Convenience
-    
     #region Constructor
 
-    public TransformComponent(RealmTile? tile = null, float rotation = 0f, int scale = 1)
-    {
-        Tile = tile;
-        Rotation = rotation;
-        Scale = scale;
-    }
-    
     #endregion Constructor
-    
+
     #region Lifecycle
-
-    public override void OnSpawn()
-    {
-        
-    }
-
     public override void OnDestroy()
     {
         Tile = null;
@@ -75,8 +61,13 @@ public class TransformComponent : GameObjectComponent
     
     #region Movement
 
-    public Task<RealmTile?> RequestMove(int globalX, int globalZ)
+    public Task<RealmTile?>? RequestMove(int globalX, int globalZ)
     {
+        if(Owner == null)
+        {
+            return null;
+        }
+
         return GameDirector.RequestMove(Owner, globalX, globalZ);
     }
     

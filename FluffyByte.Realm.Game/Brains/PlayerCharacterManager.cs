@@ -42,13 +42,13 @@ public static class PlayerCharacterManager
     }
     #endregion Lifecycle
 
-    public static PlayerProfile? CreateCharacter(string name, RealmAccount account)
+    public static PlayerProfile? CreateCharacter(PlayerProfile profile, RealmAccount account)
     {
-        var validation = ValidateName(name);
+        var validation = ValidateName(profile.Name);
 
         if (validation != NameValidationResult.Valid)
         {
-            Log.Warn($"[PlayerCharacterManager]: Character name '{name}' rejected: {validation}");
+            Log.Warn($"[PlayerCharacterManager]: Character name '{profile.Name}' rejected: {validation}");
             return null;
         }
 
@@ -58,19 +58,15 @@ public static class PlayerCharacterManager
             return null;
         }
 
-        GameDirector.CreatePlayerProfile(name);
-
-        var profile = GameDirector.GetPlayerProfile(name);
-
-        if (profile == null)
+        if (!account.AddCharacter(profile.Id))
         {
-            Log.Warn($"[PlayerCharacterManager]: Failed to create character '{name}' for account " +
-                     $"'{account.Username}'.");
-
+            Log.Warn($"[PlayerCharacterManager]: Failed to add character '{profile.Name}' to account '{account.Username}'.");
             return null;
         }
 
-        account.AddCharacter(profile.Id);
+        GameDirector.RegisterPlayerProfile(profile);
+
+        Log.Info($"[PlayerCharacterManager]: Created character '{profile.Name}' for account '{account.Username}'.");
 
         return profile;
     }
@@ -103,7 +99,7 @@ public static class PlayerCharacterManager
         if (name.Length < MinNameLength)
             return NameValidationResult.TooShort;
 
-        if (name.Length < MaxNameLength)
+        if (name.Length > MaxNameLength)
             return NameValidationResult.TooLong;
 
         if (!name.All(char.IsLetter))
