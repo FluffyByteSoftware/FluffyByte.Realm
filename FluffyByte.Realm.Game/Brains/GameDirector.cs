@@ -69,6 +69,8 @@ public static class GameDirector
         _metronome = new Metronome();
         _actorReg = new ActorRegistrar(_composer);
         _playerRegistrar = new PlayerRegistrar();
+        
+        _playerRegistrar.LoadAll();
 
         _isInitialized = true;
 

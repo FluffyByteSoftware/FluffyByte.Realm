@@ -6,13 +6,14 @@
  *------------------------------------------------------------
  */
 
-using System.Collections.Concurrent;
 using FluffyByte.Realm.Game.Brains.Assistants;
 using FluffyByte.Realm.Game.Entities.Events;
 using FluffyByte.Realm.Game.Entities.Primitives;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
+using FluffyByte.Realm.Game.Entities.Primitives.GameObjects.GameComponents;
 using FluffyByte.Realm.Game.Entities.World.Zones.Tiles.TileComponents;
 using FluffyByte.Realm.Tools.Broadcasting;
+using System.Collections.Concurrent;
 
 namespace FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 
@@ -38,11 +39,23 @@ public class RealmTile(int x, int z, int globalX, int globalZ)
     #region Passability
     public TilePassability Passability { get; set; } = TilePassability.Passable;
 
-    public bool IsPassable => Passability == TilePassability.Passable;
-    public bool IsGroundBlocked => Passability != TilePassability.Passable || HasAgent;
+    public bool IsPassable => Passability == TilePassability.Passable || !HasCollision();
+    public bool IsGroundBlocked => Passability != TilePassability.Passable || HasCollision();
     public bool IsFlyingBlocked => Passability.HasFlag(TilePassability.NotPassable);
+
+    public bool HasCollision()
+    {
+        if (Agent?.GetComponent<CollisionShapeComponent>() != null)
+            return true;
+
+        foreach (var item in Items)
+            if (item.GetComponent<CollisionShapeComponent>() != null)
+                return true;
+
+        return false;
+    }
     #endregion Passability
-    
+
     #region Neighbors
 
     public RealmTile[] Neighbors { get; private set; } = [];

@@ -52,6 +52,24 @@ public class PlayerRegistrar
     
     #region Load/Save
 
+    public void LoadAll()
+    {
+        var files = Directory.GetFiles(_savePath, "*.RealmCharacter");
+
+        foreach(var file in files)
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            var profile = LoadProfile(name);
+
+            if (profile != null)
+                Log.Info($"[PlayerRegistrar]: Loaded profile '{profile.Name}' ({profile.Id})");
+            else
+                Log.Warn($"[PlayerRegistrar]: Failed to load profile from file '{file}'");
+        }
+
+        Log.Info($"[PlayerRegistrar]: Finished loading profiles. Total loaded: {LoadedCount}");
+    }
+
     public PlayerProfile? LoadProfile(string name)
     {
         var path = GetFilePath(name);

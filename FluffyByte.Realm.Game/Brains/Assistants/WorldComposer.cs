@@ -8,6 +8,7 @@
 
 using FluffyByte.Realm.Game.Brains.Helpers;
 using FluffyByte.Realm.Game.Entities.Actors.Components;
+using FluffyByte.Realm.Game.Entities.Actors.Events;
 using FluffyByte.Realm.Game.Entities.Primitives;
 using FluffyByte.Realm.Game.Entities.Primitives.GameObjects;
 using FluffyByte.Realm.Game.Entities.World;
@@ -149,7 +150,9 @@ public class WorldComposer(RealmWorld world)
 
             if (hasMoved)
             {
-                // Recalculate this actor's tile sets
+                var previousHot = _cachedHotPerActor.GetValueOrDefault(actor);
+                var previousWarm = _cachedWarmPerActor.GetValueOrDefault(actor);
+
                 var actorHot = new HashSet<RealmTile>();
                 var actorWarm = new HashSet<RealmTile>();
 
@@ -158,9 +161,23 @@ public class WorldComposer(RealmWorld world)
                 _cachedHotPerActor[actor] = actorHot;
                 _cachedWarmPerActor[actor] = actorWarm;
 
+                var isFirst = !_lastKnownTile.ContainsKey(actor);
+
                 var isNew = !_lastKnownTile.ContainsKey(actor);
 
                 _lastKnownTile[actor] = actorTile;
+
+                var tileEvent = new ActorTilesChangedEvent
+                {
+                    Actor = actor,
+                    HotTiles = actorHot,
+                    WarmTiles = actorWarm,
+                    PreviousHotTiles = previousHot ?? [],
+                    PreviousWarmTiles = previousWarm ?? [],
+                    IsFirstRefresh = isFirst
+                };
+
+                EventManager.Publish(tileEvent);
 
                 if (isNew)
                 {

@@ -7,8 +7,10 @@
  */
 
 using FluffyByte.Realm.Networking.Clients;
+using FluffyByte.Realm.Networking.Events;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
+using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Networking.Server;
 
@@ -23,6 +25,8 @@ public static class ClientManager
         if (_isInitialized) return;
         
         EventManager.Subscribe<SystemShutdownEvent>(OnShutdown);
+
+        EventManager.Subscribe<OnPeerDisconnectedEvent>(OnPeerDisconnected);
         
         _isInitialized = true;
     }
@@ -37,8 +41,10 @@ public static class ClientManager
         {
             RemoveRealmClient(client);
         }
-        EventManager.Unsubscribe<SystemShutdownEvent>(OnShutdown);
 
+        EventManager.Unsubscribe<SystemShutdownEvent>(OnShutdown);
+        EventManager.Unsubscribe<OnPeerDisconnectedEvent>(OnPeerDisconnected);
+        
         Clients.Clear();
     }
     #endregion Life Cycle
@@ -65,6 +71,18 @@ public static class ClientManager
     {
         var c = Clients.TryGetValue(id, out client) ? client : null;
         return c;
+    }
+
+    private static void OnPeerDisconnected(OnPeerDisconnectedEvent e)
+    {
+        if (!Clients.TryGetValue(e.Peer.Id, out var client))
+        {
+            return;
+        }
+
+        Log.Info($"[ClientManager]: {client.Name} ({client.Address}) disconnected. Reason: {e.DisconnectInfo.Reason}");
+
+        Clients.Remove(e.Peer.Id);
     }
 }
 

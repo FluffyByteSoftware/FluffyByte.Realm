@@ -26,9 +26,10 @@ public static class SystemOperator
         GameDirector.Initialize();
         LoginHandler.Initialize();
         PlayerCharacterManager.Initialize();
+        NetworkBridge.Initialize();
         RealmManager.Initialize();
         PacketManager.Initialize();
-
+        
         Log.Info($"[SystemOperator]: All subroutines initialized.");
     }
 

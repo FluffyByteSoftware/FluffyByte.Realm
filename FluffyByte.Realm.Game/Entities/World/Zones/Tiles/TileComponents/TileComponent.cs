@@ -26,21 +26,22 @@ public abstract class TileComponent
 
     #region Lifecycle
 
-    public abstract void OnWarmLoad(TimeSpan elapsed, long missedFastTicks, long missedNormalTicks, long missedSlowTicks);
+    public virtual void OnWarmLoad(TimeSpan elapsed, long missedFastTicks, long missedNormalTicks, long missedSlowTicks) { }
 
-    public abstract void OnHotLoad();
 
-    public abstract void OnWarmUnload();
+    public virtual void OnHotLoad() { }
 
-    public abstract void OnColdUnload();
+    public virtual void OnWarmUnload() { }
+
+    public virtual void OnColdUnload() { }
 
     #endregion Lifecycle
 
     #region Ticks
 
-    public abstract void ActiveTick();
+    public virtual void ActiveTick() { }
 
-    public abstract void WarmTick();
+    public virtual void WarmTick() { }
 
     #endregion Ticks
 }
