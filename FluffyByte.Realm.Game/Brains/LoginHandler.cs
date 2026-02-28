@@ -12,6 +12,7 @@ using FluffyByte.Realm.Game.Entities.World.Zones.Tiles;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Networking.Clients;
 using FluffyByte.Realm.Networking.Events;
+using FluffyByte.Realm.Networking.Server;
 using FluffyByte.Realm.Shared.Misc;
 using FluffyByte.Realm.Shared.PacketTypes;
 using FluffyByte.Realm.Tools.Broadcasting;
@@ -59,7 +60,9 @@ public static class LoginHandler
         if (account == null)
         {
             Log.Warn($"[LoginHandler]: Account '{e.AccountName}' not found post-auth. Disconnecting.");
-            e.Client.Disconnect();
+
+            ClientManager.RemoveRealmClient(e.Client);
+
             return;
         }
 
@@ -143,7 +146,8 @@ public static class LoginHandler
         }
 
         Log.Warn($"[LoginHandler]: Character select timed out for {client.Name}. Disconnecting.");
-        client.Disconnect();
+        
+        ClientManager.RemoveRealmClient(client);
     }
 
     #endregion Character Action Loop
@@ -158,7 +162,7 @@ public static class LoginHandler
         {
             Log.Warn($"[LoginHandler]: {client.Name} tried to select character {packet.CharacterGuid} " +
                      $"not on their account.");
-            client.Disconnect();
+            ClientManager.RemoveRealmClient(client);
             return;
         }
 
@@ -168,7 +172,7 @@ public static class LoginHandler
         {
             Log.Warn($"[LoginHandler]: Character {packet.CharacterGuid} not found on disk. Disconnecting " +
                      $"{client.Name}.");
-            client.Disconnect();
+            ClientManager.RemoveRealmClient(client);
             return;
         }
 
@@ -234,6 +238,8 @@ public static class LoginHandler
 
         client.SendPacket(PacketType.CreateCharacterResponse, successResponse);
 
+        account.Save();
+
         SendCharacterList(client, account);
     }
 
@@ -298,7 +304,11 @@ public static class LoginHandler
             HealthRegenMultiplier = profile.HealthRegenMultiplier
         };
 
+        
         actor.AddComponent(playerComp);
+
+        AccountManager.GetAccountByUsername(client.Account.Username)?.Save();
+
 
         RealmTile? spawnTile = await GameDirector.RequestSpawn(
             actor, profile.CurrentTileX, profile.CurrentTileZ);
@@ -313,7 +323,8 @@ public static class LoginHandler
         if (spawnTile == null)
         {
             Log.Error($"[LoginHandler]: No valid spawn tile for '{profile.Name}' at 0,0. Disconnecting.");
-            client.Disconnect();
+
+            ClientManager.RemoveRealmClient(client);
             return;
         }
 

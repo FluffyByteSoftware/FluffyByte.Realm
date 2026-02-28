@@ -22,15 +22,13 @@ public static class SystemOperator
     {
         Log.Info($"[SystemOperator]: Initializing all subroutines.");
         
-        DiskManager.Initialize();
-        RealmManager.Initialize();
-        PacketManager.Initialize();
-        AccountManager.Initialize();
         ClientManager.Initialize();
         GameDirector.Initialize();
         LoginHandler.Initialize();
         PlayerCharacterManager.Initialize();
-        
+        RealmManager.Initialize();
+        PacketManager.Initialize();
+
         Log.Info($"[SystemOperator]: All subroutines initialized.");
     }
 

@@ -8,6 +8,7 @@
 
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
+using FluffyByte.Realm.Tools.Disk;
 using FluffyByte.Realm.Tools.Heartbeats;
 using FluffyByte.Realm.Tools.Logger;
 
@@ -119,7 +120,34 @@ public static class AccountManager
         Log.Info($"[AccountManager]: Saved {Accounts.Count} accounts.");
     }
     #endregion Account Loading
-    
+
+    #region Account Deletion
+    public static bool DeleteAccount(string username)
+    {
+        var account = GetAccountByUsername(username);
+        
+        if (account == null)
+            return false;
+        
+        Accounts.Remove(account);
+        KnownFiles.Remove(account.FilePath);
+        
+        try
+        {
+            DiskManager.DeleteFile(account.FilePath);
+            Log.Info($"[AccountManager]: Deleted account file '{account.FilePath}' for username '{username}'.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"[AccountManager]: Failed to delete account file '{account.FilePath}' for username '{username}'. Exception: {ex}");
+            return false;
+        }
+
+
+    }
+    #endregion Account Deletion
+
     #region Lookups
     public static RealmAccount? GetAccountByUsername(string username)
     {

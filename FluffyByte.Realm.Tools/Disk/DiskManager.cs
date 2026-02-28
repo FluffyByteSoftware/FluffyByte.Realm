@@ -18,14 +18,15 @@ public static class DiskManager
 {
     private static readonly ConcurrentDictionary<string, CachedFile> FileCache = [];
     private static readonly ConcurrentQueue<LogEntry> LogBuffer = [];
-
-    private static readonly Lock FileLock = new Lock();
-    private static readonly Lock LogLock = new Lock();
+    
+    
+    private static readonly Lock FileLock = new();
+    private static readonly Lock LogLock = new();
 
     private const int MaxCacheSizeBytes = 50 * 1024 * 1024; // 50 MB
     private const int TicksBetweenFlushes = 900; // 15 minutes at 10 ticks/sec (100 ms tick)
     private const int MaxLogBufferEntries = 1000;
-
+    
     private static Clock? _clock;
     
     private static long _currentCacheSize;
@@ -33,6 +34,7 @@ public static class DiskManager
     private static bool _initialized;
 
     private const string LogDirectory = @$"E:\FluffyByte\Builds\0.0.1\ServerData\Logs\";
+    private const string SafeRoot = @"E:\FluffyByte\Builds\0.0.1\ServerData\";
 
     public static void Initialize()
     {
@@ -73,6 +75,29 @@ public static class DiskManager
     // -------------------------------------------------------------------------
     // Write Handlers
     // -------------------------------------------------------------------------
+
+    public static void DeleteFile(string filepath)
+    {
+        var fullpath = Path.GetFullPath(filepath);
+
+        if(!fullpath.StartsWith(SafeRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"[DiskManager]: Delete blocked - path outside valid directory.");
+            return;
+        }
+
+        lock (FileLock)
+        {
+            if(FileCache.TryRemove(fullpath, out var cached))
+            {
+                _currentCacheSize -= cached.Data.Length;
+                Console.WriteLine($"[DiskManager]: Deleted file from cache: {fullpath}");
+            }
+
+            if (File.Exists(fullpath))
+                File.Delete(fullpath);
+        }
+    }
 
     private static void OnRequestFileByteWrite(RequestFileWriteByteEvent e)
     {

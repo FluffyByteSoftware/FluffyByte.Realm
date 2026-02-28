@@ -68,6 +68,8 @@ public static class PlayerCharacterManager
 
         Log.Info($"[PlayerCharacterManager]: Created character '{profile.Name}' for account '{account.Username}'.");
 
+        account.Save();
+
         return profile;
     }
 
@@ -87,7 +89,9 @@ public static class PlayerCharacterManager
         GameDirector.DeletePlayerProfile(characterId);
 
         Log.Info($"[PlayerCharacterManager]: Deleted character {characterId} from account '{account.Username}'.");
-        
+
+        account.Save();
+
         return true;
     }
 

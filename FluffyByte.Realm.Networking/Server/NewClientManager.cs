@@ -58,8 +58,8 @@ public static class NewClientManager
         }
 
         Log.Warn($"[NewClientManager]: {client.Name} timed out. Disconnecting.");
-        client.AuthNonce = null;
-        client.Disconnect();
+
+        ClientManager.RemoveRealmClient(client);
     }
 
     private static void HandleLoginSubmission(RealmClient client, SubmitLoginDataPacket packet)
@@ -73,7 +73,12 @@ public static class NewClientManager
             Log.Warn($"[NewClientManager]: Account not found for '{packet.Username}'. "+
                      $"Disconnecting {client.Name}.");
 
-            client.Disconnect();
+            if(ClientManager.Clients.ContainsKey(client.Peer.Id))
+                ClientManager.RemoveRealmClient(client);
+            else
+                client.Disconnect();
+
+
             return;
         }
 
@@ -98,7 +103,8 @@ public static class NewClientManager
 
             client.SendPacket(PacketType.AuthenticationServerResponsePacket, failedResponse);
             
-            client.Disconnect();
+            ClientManager.RemoveRealmClient(client);
+            
             return;
         }
         

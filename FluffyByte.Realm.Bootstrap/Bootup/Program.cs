@@ -5,167 +5,233 @@ using FluffyByte.Realm.Game.Entities.Actors.Players;
 using FluffyByte.Realm.Networking.Accounting;
 using FluffyByte.Realm.Shared.CryptoTool;
 using FluffyByte.Realm.Shared.Misc;
+using FluffyByte.Realm.Tools.Disk;
 using FluffyByte.Realm.Tools.Logger;
 
 namespace FluffyByte.Realm.Bootstrap.Bootup;
 
 public static class Program
 {
+    private static bool _serverRunning;
+
     public static void Main()
     {
-        Startup();
-
-        //CreateSeliris();
-
-        StressTest();
-        
-        //CreatePlayerSeliris();
-        
-        Console.ReadLine();
-
-        Shutdown();
-    }
-
-    private static void CreatePlayerSeliris()
-    {
-        var selirisProfile = new PlayerProfile()
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
         {
-            LineOfSight = 350,
-            AudibleRange = 200,
-            Id = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
-            Name = "seliris",
-            CurrentHealth = 100,
-            MaxHealth = 100,
-            HealthRegenPerTick = 1,
-            HealthRegenIntervalSeconds = 5,
-            HealthRegenMultiplier = 1,
-            Strength = 10,
-            Dexterity = 10,
-            Constitution = 10,
-            Intelligence = 10,
-            Wisdom = 10,
-            Charisma = 10,
-            CurrentTileX = 0,
-            CurrentTileZ = 0,
-            PreviousTileX = 0,
-            PreviousTileZ = 0,
-            ModelType = PrimitiveModelType.Capsule,
-            ComplexModelType = ComplexModelType.DefaultMasculine,
-            FootprintRadius = 1
+            if (_serverRunning) StopServer();
         };
 
-        GameDirector.SavePlayerProfile(selirisProfile);
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            if (_serverRunning) StopServer();
+        };
 
-        GameDirector.SavePlayerProfiles();
+        Console.Title = "Taerin's Whisper - Realm Server";
+
+        DiskManager.Initialize();
+        AccountManager.Initialize();
+
+        while (true)
+        {
+            PrintMenu();
+            var input = Console.ReadLine()?.Trim();
+
+            switch (input)
+            {
+                case "1":
+                    ToggleServer();
+                    break;
+                case "2":
+                    AccountMenu();
+                    break;
+                case "3":
+                    Console.WriteLine($"Status panel not yet implemented.");
+                    break;
+                case "0":
+                    if (_serverRunning)
+                        StopServer();
+                    return;
+                default:
+                    break;
+
+            }
+        }
     }
-    
-    private static void CreateSeliris()
+
+    private static void PrintMenu()
     {
-        var pass = "password123";
-
-        var encryptedPassword = CryptoManager.EncryptPassword(pass);
-
-        var account = new RealmAccount("seliris", encryptedPassword);
-
-        account.Save();
-
-        Log.Info($"Created account '{account.Username}' with password '{pass}'.");
+        Console.WriteLine();
+        Console.WriteLine("=== Taerin's Whisper ===");
+        Console.WriteLine($"  1 - {(_serverRunning ? "Stop" : "Start")} Server");
+        Console.WriteLine("  2 - Account Management");
+        Console.WriteLine("  3 - System Status (NYI)");
+        Console.WriteLine("  0 - Exit");
+        Console.Write("> ");
     }
 
-    private static void Startup()
+    #region Server 
+    private static void ToggleServer()
+    {
+        if (_serverRunning)
+            StopServer();
+
+        else
+            StartServer();        
+    }
+
+    private static void StartServer()
     {
         SystemOperator.InitializeSystem();
-
         SystemOperator.StartSystem();
+        _serverRunning = true;
+        Console.WriteLine("Server started successfully.");
     }
 
-    private static void Shutdown()
+    private static void StopServer()
     {
         SystemOperator.ShutdownSystem();
+        _serverRunning = false;
+        Console.WriteLine("Server stopped successfully.");
+    }
+    #endregion Server
 
+    #region Account Management
+    private static void AccountMenu()
+    {
+        while (true)
+        {
+            Console.WriteLine();
+            Console.WriteLine("--- Account Management ---");
+            Console.WriteLine(" 1 - Create Account");
+            Console.WriteLine(" 2 - Delete Account");
+            Console.WriteLine(" 3 - Reset Password");
+            Console.WriteLine(" 0 - Back to Main Menu");
+            Console.Write("> ");
+
+            var input = Console.ReadLine()?.Trim();
+
+            switch (input)
+            {
+                case "1":
+                    CreateAccount();
+                    break;
+                case "2":
+                    DeleteAccount();
+                    break;
+                case "3":
+                    ResetPassword();
+                    break;
+                case "0":
+                    return;
+                default: 
+                    Console.WriteLine("Invalid input. Please try again.");
+                    break;
+            }
+        }
     }
 
-    private static void StressTest()
+    private static void DeleteAccount()
     {
-        var random = new Random(42);
-        const int actorCount = 30;
-        const int sightRange = 50;
-        const int audibleRange = 30;
+        Console.Write("Username to delete: ");
+        var username = Console.ReadLine()?.Trim();
 
-        Log.Info($"[StressTest]:  Spawning {actorCount} elite actors with SightRange={sightRange}...");
-
-        for (var i = 0; i < actorCount; i++)
+        if (string.IsNullOrEmpty(username))
         {
-            var template = new ActorTemplate()
-            {
-                Name = $"StressActor_{i:D3}",
-                CurrentTileX = 0,
-                CurrentTileZ = 0,
-                PreviousTileX = 0,
-                PreviousTileZ = 0,
-                CurrentHealth = 100,
-                MaxHealth = 100,
-                HealthRegenPerTick = 1,
-                HealthRegenIntervalSeconds = 5,
-                HealthRegenMultiplier = 1,
-                Strength = 10,
-                Dexterity = 10,
-                Constitution = 10,
-                Intelligence = 10,
-                Wisdom = 10,
-                Charisma = 10,
-                LineOfSight = sightRange,
-                AudibleRange = audibleRange,
-                ModelType = PrimitiveModelType.Capsule,
-                ComplexModelType = ComplexModelType.DefaultAndrogynous,
-                FootprintRadius = 1,
-                Id = Guid.NewGuid(),
-            };
-            
-            var actor = ActorFactory.CreateEliteActor(template);
-
-            var rand = new Random(0);
-            
-            var wandering = new WanderingAi(100);
-            actor.AddComponent(wandering);
-       
-            Log.Debug($"[StressTest]: Created {actor.Name}");
-            
-            var spawnX = random.Next(2000, 190000);
-            var spawnZ = random.Next(2000, 190000);
-            
-            GameDirector.RequestSpawn(actor, spawnX, spawnZ);
-            Log.Info($"[StressTest]: Queued {actor.Name} at ({spawnX}, {spawnZ})");
+            Console.WriteLine("Cancelled.");
+            return;
         }
 
-        var monitor = new Thread(() =>
+        var account = AccountManager.GetAccountByUsername(username);
+
+        if(account == null)
         {
-            var end = DateTime.UtcNow.AddSeconds(60);
-            var tick = 0;
+            Console.WriteLine($"Account: '{username}' was not found.");
+            return;
+        }
 
-            while (DateTime.UtcNow < end)
-            {
-                Thread.Sleep(2000);
-                tick++;
+        Console.WriteLine($"Are you sure you want to delete '{username}' yes/no?");
+        var confirm = Console.ReadLine()?.Trim().ToLower();
 
-                var proc = System.Diagnostics.Process.GetCurrentProcess();
-                var memMb = proc.WorkingSet64 / (1024 * 1024);
-
-                Log.Debug($"[StressTest][{tick:D3}]: {GameDirector.Status()} " +
-                          $"Fast={GameDirector.FastTickCount} " +
-                          $"Normal={GameDirector.NormalTickCount} " +
-                          $"Slow={GameDirector.SlowTickCount} " +
-                          $"RAM={memMb}MB");
-            }
-
-            Log.Info($"[StressTest]: Complete.");
-        })
+        if (confirm != "yes")
         {
-            IsBackground = true,
-            Name = "StressMonitor"
-        };
+            Console.WriteLine("Cancelled. Must explicitly type yes.");
+            return;
+        }
 
-        monitor.Start();
+        if(AccountManager.DeleteAccount(username))
+            Console.WriteLine($"Account '{username}' deleted successfully.");
+        else
+            Console.WriteLine($"Failed to delete account '{username}'.");
     }
+
+    private static void ResetPassword()
+    {
+        Console.Write("Username: ");
+        var username = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrEmpty(username))
+        {
+            Console.WriteLine("Cancelled.");
+            return;
+        }
+
+        var account = AccountManager.GetAccountByUsername(username);
+
+        if (account == null)
+        {
+            Console.WriteLine($"Account '{username}' not found.");
+            return;
+        }
+
+        Console.Write("New Password: ");
+        var password = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrEmpty(password))
+        {
+            Console.WriteLine($"Cancelled.");
+            return;
+        }
+
+        account.PasswordHash = CryptoManager.EncryptPassword(password);
+        account.Save();
+
+        Console.WriteLine($"Password reset for '{username}' successfully.");
+    }
+
+    private static void CreateAccount()
+    {
+        Console.Write("Username: ");
+        var username = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrEmpty(username))
+        {
+            Console.WriteLine($"Username cannot be empty.");
+            return;
+        }
+
+        Console.Write("Password: ");
+        var password = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrEmpty(password))
+        {
+            Console.WriteLine($"Password cannot be empty.");
+            return;
+        }
+
+        try
+        {
+            var encrypted = CryptoManager.EncryptPassword(password);
+            var account = new RealmAccount(username, encrypted);
+            account.Save();
+
+            Console.WriteLine($"Account '{username}' created.");           
+        }
+        catch(ArgumentException ex)
+        {
+            Log.Error(ex);
+        }
+        
+    }
+    #endregion Account Management
 }

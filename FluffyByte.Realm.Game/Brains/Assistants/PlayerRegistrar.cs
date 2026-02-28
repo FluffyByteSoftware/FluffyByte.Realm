@@ -21,8 +21,6 @@ public class PlayerRegistrar
     private readonly Dictionary<Guid, PlayerProfile> _profiles = [];
     private readonly string _savePath;
 
-    private readonly static JsonSerializerOptions _options = new() { WriteIndented = true };
-
     public PlayerRegistrar()
     {
         _savePath = GameDirector.Config.CharacterDataPath;
@@ -77,7 +75,7 @@ public class PlayerRegistrar
             return null;
         }
         
-        var profile = JsonSerializer.Deserialize<PlayerProfile>(json);
+        var profile = JsonSerializer.Deserialize<PlayerProfile>(json, FluffyJson.Options);
 
         if (profile == null)
             return null;
@@ -91,7 +89,7 @@ public class PlayerRegistrar
     {
         var path = GetFilePath(profile.Name);
         
-        string json = JsonSerializer.Serialize(profile, _options);
+        string json = JsonSerializer.Serialize(profile, FluffyJson.Options);
 
         var requestWrite = new RequestFileWriteTextEvent()
         {

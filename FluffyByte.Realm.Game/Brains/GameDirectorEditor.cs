@@ -8,6 +8,7 @@
 
 using System.Text.Json;
 using System.Xml.Linq;
+using FluffyByte.Realm.Shared.Misc;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 
@@ -20,14 +21,6 @@ public class GameDirectorEditor
     public const string ConfigFilePath =
         @"E:\FluffyByte\Builds\0.0.1\ServerData\GameDirectorConfig.json";
     #endregion Constants
-    
-    #region Json Options
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true
-    };
-    #endregion Json Options
     
     #region Load
 
@@ -52,7 +45,7 @@ public class GameDirectorEditor
 
         try
         {
-            var config = JsonSerializer.Deserialize<GameDirectorConfig>(text, JsonOptions);
+            var config = JsonSerializer.Deserialize<GameDirectorConfig>(text, FluffyJson.Options);
 
             if (config is null)
             {
@@ -78,7 +71,7 @@ public class GameDirectorEditor
 
     public void Save(GameDirectorConfig config)
     {
-        var json = JsonSerializer.Serialize(config, JsonOptions);
+        var json = JsonSerializer.Serialize(config, FluffyJson.Options);
         
         EventManager.Publish(new RequestFileWriteTextEvent()
         {

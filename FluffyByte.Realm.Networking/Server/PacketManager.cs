@@ -150,11 +150,14 @@ public static class PacketManager
         {
             PacketType.RequestLoginDataPacket => new RequestLoginDataPacket(),
             PacketType.SubmitLoginDataPacket => new SubmitLoginDataPacket(),
+            PacketType.SelectCharacter => new SelectCharacterPacket(),
+            PacketType.RequestCreateCharacter => new RequestCreateCharacterPacket(),
+            PacketType.RequestDeleteCharacter => new RequestDeleteCharacterPacket(),
             // Character Bucket (10-14)
             // Movement Bucket
             // Combat Bucket
             // General Bucket
-            _ => null
+            _ => null,
         };
 
         packet?.Deserialize(reader);

@@ -7,6 +7,7 @@
  */
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FluffyByte.Realm.Shared.Misc;
 using FluffyByte.Realm.Tools.Broadcasting;
 using FluffyByte.Realm.Tools.Broadcasting.Events;
 using FluffyByte.Realm.Tools.Logger;
@@ -33,6 +34,11 @@ public class RealmAccount
         {
             throw new ArgumentException("Username must be between 3 and 20 characters.");
         }
+
+        if (!username.All(char.IsLetter))
+        {
+            throw new ArgumentException("Username must contain only letters.");
+        }
         
         Username = username;
         PasswordHash = passwordHash;
@@ -56,14 +62,19 @@ public class RealmAccount
 
         try
         {
-            var account = JsonSerializer.Deserialize<RealmAccount>(json);
+            var account = JsonSerializer.Deserialize<RealmAccount>(json, FluffyJson.Options);
+
+            Console.WriteLine($"Account deserialized.\n " +
+                $"Username: {account?.Username}");
+
             if (account == null) return null;
 
             account.FilePath = filePath;
 
             if (string.IsNullOrEmpty(account.Username) || account.PasswordHash.Length == 0)
             {
-                Log.Warn($"[RealmAccount]: Missing required fields in {filePath}");
+                Log.Warn($"[RealmAccount]: Missing required fields in {filePath}; missing account.Username or account.PasswordHash");
+                Log.Warn($"[RealmAccount]: account.Username: '{account.Username}', account.PasswordHash length: {account.PasswordHash.Length}");
                 return null;
             }
 
@@ -90,10 +101,7 @@ public class RealmAccount
             ? Path.Combine(AccountsFolder, $"{Username}.account")
             : FilePath;
 
-        var json = JsonSerializer.Serialize(this, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
+        var json = JsonSerializer.Serialize(this, FluffyJson.Options);
 
         var write = new RequestFileWriteTextEvent
         {
