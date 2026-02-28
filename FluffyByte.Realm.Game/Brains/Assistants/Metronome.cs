@@ -43,6 +43,8 @@ public class Metronome : IDisposable
     /// <summary>Current Slow interval in ms. Synced from config on Start().</summary>
     public static int SlowIntervalMs { get; private set; } = 100;
 
+    public static int VerySlowIntervalMs { get; private set; } = 60000;
+
     #endregion Static Interval Shortcuts
 
     #region State
@@ -58,6 +60,7 @@ public class Metronome : IDisposable
     private double _fastAccumulatorMs;
     private double _normalAccumulatorMs;
     private double _slowAccumulatorMs;
+    private double _verySlowAccumulatorMs;
 
     #endregion Tick Accumulators
 
@@ -66,6 +69,7 @@ public class Metronome : IDisposable
     public long FastTickCount { get; private set; }
     public long NormalTickCount { get; private set; }
     public long SlowTickCount { get; private set; }
+    public long VerySlowTickCount { get; private set; }
 
     private const int MaxCatchupTicks = 3;
     
@@ -87,6 +91,7 @@ public class Metronome : IDisposable
         FastIntervalMs = GameDirector.Config.FastIntervalMs;
         NormalIntervalMs = GameDirector.Config.NormalIntervalMs;
         SlowIntervalMs = GameDirector.Config.SlowIntervalMs;
+        VerySlowIntervalMs = GameDirector.Config.VerySlowIntervalS;
 
         _running = true;
         _cts = new CancellationTokenSource();
@@ -129,6 +134,9 @@ public class Metronome : IDisposable
         
         _cts = null;
         _thread = null;
+
+        GC.SuppressFinalize(this);
+        GC.Collect();
     }
     #endregion Lifecycle
 
@@ -148,12 +156,14 @@ public class Metronome : IDisposable
             _fastAccumulatorMs += deltaMs;
             _normalAccumulatorMs += deltaMs;
             _slowAccumulatorMs += deltaMs;
-            
+            _verySlowAccumulatorMs += deltaMs;
+
             // Cap it to prevent a death cycle
             _fastAccumulatorMs = Math.Min(_fastAccumulatorMs, FastIntervalMs * MaxCatchupTicks);
             _normalAccumulatorMs = Math.Min(_normalAccumulatorMs, NormalIntervalMs * MaxCatchupTicks);
             _slowAccumulatorMs = Math.Min(_slowAccumulatorMs, SlowIntervalMs * MaxCatchupTicks);
-            
+            _verySlowAccumulatorMs = Math.Min(_verySlowAccumulatorMs, VerySlowIntervalMs * MaxCatchupTicks);
+
             while (_fastAccumulatorMs >= FastIntervalMs)
             {
                 _fastAccumulatorMs -= FastIntervalMs;
@@ -170,6 +180,12 @@ public class Metronome : IDisposable
             {
                 _slowAccumulatorMs -= SlowIntervalMs;
                 FireTick(TickType.Slow);
+            }
+
+            while(_verySlowAccumulatorMs >= VerySlowIntervalMs)
+            {
+                _verySlowAccumulatorMs -= VerySlowIntervalMs;
+                FireTick(TickType.VerySlow);
             }
 
             var sleepMs = FastIntervalMs / 2;
@@ -189,8 +205,9 @@ public class Metronome : IDisposable
             case TickType.Fast      : FastTickCount++;        break;
             case TickType.Normal    : NormalTickCount++;      break;
             case TickType.Slow      : SlowTickCount++;        break;
-            case TickType.None:
-                break;
+            case TickType.VerySlow  : VerySlowTickCount++;    break;
+            case TickType.None:                               break;
+            
             default:
                 throw new ArgumentOutOfRangeException(nameof(tickType), tickType, null);
         }
@@ -204,7 +221,8 @@ public class Metronome : IDisposable
     #region Diagnostics
 
     public override string ToString()
-        => $"Metronome Running={_running} Fast={FastTickCount} Normal={NormalTickCount} Slow={SlowTickCount}";
+        => $"Metronome Running={_running} Fast={FastTickCount} " +
+        $"Normal={NormalTickCount} Slow={SlowTickCount} VerySlow={VerySlowTickCount}";
     #endregion Diagnostics
 }
 /*

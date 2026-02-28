@@ -529,6 +529,14 @@ public static class GameDirector
     /// synchronization purposes in applications that require precise control over timing events.</remarks>
     public static long SlowTickCount => _metronome.SlowTickCount;
 
+    /// <summary>
+    /// Gets the current tick count measured by the metronome, which is updated at a very slow rate.
+    /// </summary>
+    /// <remarks>This property provides access to the tick count that is intended for scenarios where high
+    /// precision is not required. It is useful for tracking time intervals in less time-sensitive
+    /// applications.</remarks>
+    public static long VerySlowTickCount => _metronome.VerySlowTickCount;
+
     #endregion Tick Handlers
 
     #region Diagnostics

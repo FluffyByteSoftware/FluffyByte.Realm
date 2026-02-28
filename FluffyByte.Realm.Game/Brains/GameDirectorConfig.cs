@@ -24,12 +24,14 @@ public class GameDirectorConfig
     public int FastIntervalMs { get; set; } = 20;
     public int NormalIntervalMs { get; set; } = 60;
     public int SlowIntervalMs { get; set; } = 100;
-    #endregion Tick Intervals
+    public int VerySlowIntervalS { get; set; } = 1;
+
+    #endregion Intervals
     
     #region Radii
 
-    public int HotRadius { get; set; } = 10;
-    public double WarmRadiusMultiplier { get; set; } = 1.4;
+    public int HotRadius { get; set; } = 100;
+    public double WarmRadiusMultiplier { get; set; } = 2.5;
     
     [JsonIgnore]
     public int WarmRadius => (int)Math.Round(HotRadius * WarmRadiusMultiplier);
